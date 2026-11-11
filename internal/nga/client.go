@@ -90,7 +90,7 @@ func (c *Client) get(ctx context.Context, path string, query url.Values) ([]byte
 	return c.request(ctx, http.MethodGet, path, query, nil)
 }
 func (c *Client) request(ctx context.Context, method, path string, query, form url.Values) ([]byte, error) {
-	if !query.Has("noBBCode") {
+	if !query.Has("noBBCode") && !query.Has("__output") {
 		query.Set("__output", "11")
 	}
 	query.Set("__inchst", "UTF8")
