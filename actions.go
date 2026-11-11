@@ -213,6 +213,9 @@ func (a *reader) addBoard() {
 	a.selectBoard(board)
 }
 func (a *reader) returnToLive() {
+	if !a.allowSessionChange() {
+		return
+	}
 	if a.liveState != nil {
 		a.state = *a.liveState
 		a.liveState = nil

@@ -1,6 +1,7 @@
 # Local user settings and encrypted account sessions
 data/
 **/session.enc
+**/drafts.json
 **/settings.json
 **/settings.invalid-*.json
 **/.write-*

@@ -40,6 +40,9 @@ func demoThread(id int64) nga.ThreadPage {
 	return nga.ThreadPage{Topic: selected, Posts: posts, Page: 1, TotalPages: 1, TotalRows: 3, MainAuthorID: selected.AuthorID}
 }
 func (a *reader) useDemo() {
+	if !a.allowSessionChange() {
+		return
+	}
 	if !a.demo {
 		snapshot := a.state
 		snapshot.Boards = append([]local.Board(nil), a.state.Boards...)

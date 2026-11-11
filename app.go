@@ -50,6 +50,13 @@ type reader struct {
 	loadingTopics, loadingThread                  bool
 	topicErr, threadErr                           error
 	topicGate, threadGate                         local.RequestGate
+	composeGate                                   local.RequestGate
+	compose                                       composerState
+	posting                                       postingAPI
+	runPosting                                    func(func())
+	postAfterLogin                                *postIntent
+	drafts                                        []local.Draft
+	draftsError                                   error
 	favoriteGate                                  local.RequestGate
 	loadingFavorites, importAfterLogin            bool
 	listState                                     ui.ListState
@@ -67,6 +74,7 @@ func newReader(dir string) *reader {
 	state, err := local.Load(dir)
 	ctx, cancel := context.WithCancel(context.Background())
 	a := &reader{dir: dir, state: state, ctx: ctx, cancel: cancel, mode: "board", client: nga.NewClient(&http.Client{Transport: netproxy.Transport(), Timeout: 25 * time.Second})}
+	a.drafts, a.draftsError = local.LoadDrafts(dir)
 	a.board = state.Boards[0]
 	for _, b := range state.Boards {
 		if b.ID == state.LastBoard {
@@ -185,7 +193,9 @@ func (a *reader) shutdown() {
 		return
 	}
 	a.closing = true
+	a.saveComposer()
 	a.cancel()
+	a.composeGate.Close()
 	a.topicGate.Close()
 	a.threadGate.Close()
 	a.favoriteGate.Close()

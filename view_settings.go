@@ -121,6 +121,9 @@ func (a *reader) persistSessionPreference() {
 	a.save()
 }
 func (a *reader) signOut() {
+	if !a.allowSessionChange() {
+		return
+	}
 	a.favoriteGate.Begin(a.ctx)
 	a.loadingFavorites = false
 	a.topicGate.Begin(a.ctx)
@@ -147,5 +150,19 @@ func (a *reader) openOriginal() {
 		if err := mygo.Shell.OpenExternal(fmt.Sprintf("https://bbs.nga.cn/read.php?tid=%d&page=%d", a.selected.ID, max(1, a.thread.Page))); err != nil {
 			a.notify("无法打开原帖")
 		}
+	}
+}
+
+func (a *reader) openComposerOriginal() {
+	if a.win == nil || a.demo || a.compose.Sending {
+		return
+	}
+	target := a.compose.Draft.Target
+	address := fmt.Sprintf("https://bbs.nga.cn/thread.php?fid=%d", target.FID)
+	if target.TID > 0 {
+		address = fmt.Sprintf("https://bbs.nga.cn/read.php?tid=%d&page=e", target.TID)
+	}
+	if err := mygo.Shell.OpenExternal(address); err != nil {
+		a.compose.Error = "无法打开官方页面"
 	}
 }

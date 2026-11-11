@@ -46,6 +46,9 @@ func TestPostingUsesUTF8InputAndGB18030Output(t *testing.T) {
 					return
 				}
 				posts++
+				if r.ContentLength <= 0 || len(r.TransferEncoding) > 0 {
+					t.Error("posting form must have a known length")
+				}
 				_ = r.ParseForm()
 				if r.PostForm.Get("post_content") != "中文 & + 换行\n[s:ac:茶]" || r.PostForm.Get("step") != "2" || r.URL.Query().Get("action") != action {
 					t.Errorf("form changed content: %#v", r.PostForm)

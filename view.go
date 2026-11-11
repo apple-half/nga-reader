@@ -7,6 +7,7 @@ import (
 
 	"github.com/egoist/mygo/ui"
 	"github.com/egoist/mygo/ui/markdown"
+	"ngareader/internal/nga"
 )
 
 type palette struct{ side, list, selected, hover, accent ui.Color }
@@ -116,6 +117,7 @@ func (a *reader) view(c *ui.Context) {
 	})
 	a.dialogs(c, p)
 	a.helpDialog(c)
+	a.composerView(c)
 }
 
 func (a *reader) titlebar(c *ui.Context, p palette) {
@@ -198,6 +200,7 @@ func (a *reader) topicPane(c *ui.Context, p palette) {
 				ui.Text(c, name).FontSize(15).FontWeight(500).SingleLine()
 				ui.Text(c, "NGA / 综合讨论").FontSize(11).TextColor(c.Theme().TextMuted)
 			})
+			ui.Button(c, "发帖").FontSize(12).Padding(5, 9).Disabled(a.mode != "board" || a.compose.Sending).OnClick(func() { a.openComposer(nga.PostTarget{Action: "new", FID: a.board.ID}, a.board.Name) })
 			iconButton(c, "refresh", "refresh", "刷新帖子列表", a.loadingTopics || a.demo || a.mode != "board").OnClick(func() { a.loadTopics(max(1, a.topics.Page)) })
 		})
 		ui.TextInput(c.Key("filter"), &a.filter).Placeholder("筛选当前页话题…").Label("筛选话题").Margin(13, 13, 8, 13).FontSize(12)

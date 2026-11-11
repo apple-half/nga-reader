@@ -27,6 +27,9 @@ func (a *reader) adoptLoginCookies(values []*http.Cookie) error {
 	if !temporary.HasSession() {
 		return errors.New("尚未检测到 NGA 登录会话。请在官方页面完成登录，成功后会自动返回。")
 	}
+	if !a.allowSessionChange() {
+		return errors.New("正在发送或草稿保存失败，暂时不能切换登录会话")
+	}
 	a.client.SetCookies(temporary.Cookies())
 	return nil
 }
@@ -115,6 +118,9 @@ func webviewAvailable() bool {
 	return false
 }
 func (a *reader) openLogin() {
+	if !a.allowSessionChange() {
+		return
+	}
 	if a.win == nil {
 		return
 	}
@@ -293,14 +299,22 @@ func (a *reader) checkLogin(manual bool) bool {
 		a.importAfterLogin = false
 		a.importFavoriteBoards()
 	}
+	a.resumeComposerAfterLogin()
 	return true
 }
 func (a *reader) importSession() {
+	if a.compose.Sending {
+		a.formError = "正在发送，暂时不能切换账号"
+		return
+	}
 	remember := a.state.RememberLogin
 	// Validate before changing the active session or leaving demo mode.
 	temporary := nga.NewClient(nil)
 	if err := temporary.ImportCookieHeader(a.cookieInput); err != nil {
 		a.formError = err.Error()
+		return
+	}
+	if !a.allowSessionChange() {
 		return
 	}
 	if a.demo {
@@ -320,4 +334,5 @@ func (a *reader) importSession() {
 		a.importAfterLogin = false
 		a.importFavoriteBoards()
 	}
+	a.resumeComposerAfterLogin()
 }

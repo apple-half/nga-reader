@@ -236,11 +236,13 @@ func (c *Client) PublishPost(ctx context.Context, prepared PostPreparation, subj
 	query.Set("__inchst", "UTF8")
 	// A non-replayable body and a redirect refusal prevent a 307/308 (or a
 	// transport retry) from silently submitting the same user content twice.
-	body := io.NopCloser(strings.NewReader(form.Encode()))
+	encoded := form.Encode()
+	body := io.NopCloser(strings.NewReader(encoded))
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.base+"/post.php?"+query.Encode(), body)
 	if err != nil {
 		return fail(err, false)
 	}
+	req.ContentLength = int64(len(encoded))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Referer", BaseURL+"/post.php?"+prepared.Target.query().Encode())
