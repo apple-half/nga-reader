@@ -7,6 +7,7 @@ import os
 import subprocess
 
 from package import ROOT, VERSION, TARGETS, asset_name, check_version, checksums, update_asset_names
+from feed import publish_feeds
 
 
 def gh(*args):
@@ -34,11 +35,17 @@ def verify_updates(directory):
     subprocess.run(['go', 'run', './cmd/update-release', 'verify', '--dir', str(directory), '--version', VERSION, '--key', str(ROOT / 'resources' / 'update-public.txt')], cwd=ROOT, check=True, capture_output=True, text=True)
 
 
-def main(stage_only=False):
+def main(stage_only=False, feed_only=False):
     repo = os.environ['GITHUB_REPOSITORY']
     tag = os.environ['RELEASE_TAG']
     check_version(tag)
     directory = ROOT / 'dist'
+    if stage_only and feed_only:
+        raise RuntimeError('Stage and feed-only modes cannot be combined')
+    if feed_only:
+        verify_updates(directory)
+        publish_feeds(repo, tag, directory, release(repo, tag), gh)
+        return
     if not stage_only:
         verify_updates(directory)
     checksums(directory, include_updates=not stage_only)
@@ -69,10 +76,13 @@ def main(stage_only=False):
     final = release(repo, tag)
     if final['draft'] or not final['prerelease']:
         raise RuntimeError('Release did not reach the expected public prerelease state')
+    publish_feeds(repo, tag, directory, final, gh)
     print(final['html_url'])
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--stage-only', action='store_true', help='Upload only the three portable ZIPs; keep the release unpublished for offline signing')
-    main(stage_only=parser.parse_args().stage_only)
+    parser.add_argument('--feed-only', action='store_true', help='Repair only the public indexes from a verified existing release; never change its assets')
+    args = parser.parse_args()
+    main(stage_only=args.stage_only, feed_only=args.feed_only)

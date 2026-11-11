@@ -63,6 +63,8 @@ class PublishTests(unittest.TestCase):
         self.calls = []
         self.state = {'draft': True, 'prerelease': False}
         self.verify_error = None
+        self.feed_error = None
+        self.feed_calls = []
 
     def gh(self, *args):
         self.calls.append(args)
@@ -74,9 +76,15 @@ class PublishTests(unittest.TestCase):
     def release(self, *args, **kwargs):
         return {**self.state, 'assets': self.assets, 'html_url': 'https://github.com/example/reader/releases/tag/v' + publish.VERSION}
 
-    def run_publish(self, stage_only=False):
-        with patch.dict(os.environ, {'GITHUB_REPOSITORY': 'example/reader', 'RELEASE_TAG': 'v' + publish.VERSION}), patch.object(publish, 'ROOT', self.root), patch.object(publish, 'check_version'), patch.object(publish, 'checksums'), patch.object(publish, 'verify_updates', side_effect=self.verify_error), patch.object(publish, 'release', side_effect=self.release), patch.object(publish, 'gh', side_effect=self.gh):
-            publish.main(stage_only=stage_only)
+    def feed(self, repo, tag, directory, current, gh):
+        self.assertFalse(current['draft'], 'Index exposed private draft assets')
+        self.feed_calls.append((repo, tag, directory))
+        if self.feed_error:
+            raise self.feed_error
+
+    def run_publish(self, stage_only=False, feed_only=False):
+        with patch.dict(os.environ, {'GITHUB_REPOSITORY': 'example/reader', 'RELEASE_TAG': 'v' + publish.VERSION}), patch.object(publish, 'ROOT', self.root), patch.object(publish, 'check_version'), patch.object(publish, 'checksums'), patch.object(publish, 'verify_updates', side_effect=self.verify_error), patch.object(publish, 'release', side_effect=self.release), patch.object(publish, 'gh', side_effect=self.gh), patch.object(publish, 'publish_feeds', side_effect=self.feed):
+            publish.main(stage_only=stage_only, feed_only=feed_only)
 
     def test_reused_stable_draft_is_made_prerelease_before_exposure(self):
         self.run_publish()
@@ -85,6 +93,7 @@ class PublishTests(unittest.TestCase):
         self.assertIn('--draft=false', edits[0])
         self.assertIn('--prerelease', edits[0])
         self.assertEqual(self.state, {'draft': False, 'prerelease': True})
+        self.assertEqual(len(self.feed_calls), 1)
 
     def test_wrong_uploaded_digest_leaves_release_as_draft(self):
         self.assets[0]['digest'] = 'sha256:' + '0' * 64
@@ -104,6 +113,7 @@ class PublishTests(unittest.TestCase):
         self.run_publish(stage_only=True)
         self.assertTrue(self.state['draft'])
         self.assertFalse(any(c[:2] == ('release', 'edit') for c in self.calls))
+        self.assertEqual(self.feed_calls, [])
 
     def test_finalization_requires_offline_signatures_before_upload(self):
         self.verify_error = RuntimeError('invalid update signature')
@@ -111,10 +121,30 @@ class PublishTests(unittest.TestCase):
             self.run_publish()
         self.assertTrue(self.state['draft'])
         self.assertEqual(self.calls, [])
+        self.assertEqual(self.feed_calls, [])
 
     def test_signed_draft_cannot_be_rebuilt_over_existing_signatures(self):
         with self.assertRaisesRegex(RuntimeError, 'already contains signed'):
             self.run_publish(stage_only=True)
+        self.assertEqual(self.calls, [])
+
+    def test_failed_feed_can_be_repaired_without_touching_public_assets(self):
+        self.feed_error = RuntimeError('non-fast-forward')
+        with self.assertRaisesRegex(RuntimeError, 'non-fast-forward'):
+            self.run_publish()
+        self.assertFalse(self.state['draft'])
+        self.feed_error = None
+        self.calls.clear()
+        self.run_publish(feed_only=True)
+        self.assertEqual(self.calls, [])
+        self.assertEqual(len(self.feed_calls), 2)
+
+    def test_feed_repair_still_requires_signature_verification(self):
+        self.state['draft'] = False
+        self.verify_error = RuntimeError('invalid update signature')
+        with self.assertRaisesRegex(RuntimeError, 'signature'):
+            self.run_publish(feed_only=True)
+        self.assertEqual(self.feed_calls, [])
         self.assertEqual(self.calls, [])
 
 

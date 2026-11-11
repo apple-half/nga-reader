@@ -4,18 +4,26 @@
 
 | 你的电脑 | 直接下载 | 打开方式 |
 | --- | --- | --- |
-| **Windows 64 位** | **[下载 Windows 免安装包](https://github.com/apple-half/nga-reader/releases/download/v0.1.7/NGAReader-0.1.7-Windows-x64-portable.zip)** | 解压整个文件夹，双击 `NGAReader.exe` |
-| **Mac · Apple 芯片（M 系列）** | **[下载 Mac M 系列免安装包](https://github.com/apple-half/nga-reader/releases/download/v0.1.7/NGAReader-0.1.7-macOS-AppleSilicon-portable.zip)** | 解压后打开 `NGAReader.app` |
-| **Mac · Intel 芯片** | **[下载 Mac Intel 免安装包](https://github.com/apple-half/nga-reader/releases/download/v0.1.7/NGAReader-0.1.7-macOS-Intel-portable.zip)** | 解压后打开 `NGAReader.app` |
+| **Windows 64 位** | **[下载 Windows 免安装包](https://github.com/apple-half/nga-reader/releases/download/v0.1.8/NGAReader-0.1.8-Windows-x64-portable.zip)** | 解压整个文件夹，双击 `NGAReader.exe` |
+| **Mac · Apple 芯片（M 系列）** | **[下载 Mac M 系列免安装包](https://github.com/apple-half/nga-reader/releases/download/v0.1.8/NGAReader-0.1.8-macOS-AppleSilicon-portable.zip)** | 解压后打开 `NGAReader.app` |
+| **Mac · Intel 芯片** | **[下载 Mac Intel 免安装包](https://github.com/apple-half/nga-reader/releases/download/v0.1.8/NGAReader-0.1.8-macOS-Intel-portable.zip)** | 解压后打开 `NGAReader.app` |
 
 Mac 用户可在“苹果菜单 → 关于本机”查看芯片。最低支持 macOS 12。
 
-**从旧版升级：先退出旧版，替换程序并保留原数据目录。** 0.1.6及更早版本需要先手动下载一次0.1.7。
+**从旧版升级：先退出旧版，替换程序并保留原数据目录。** 0.1.6及更早版本，或0.1.7检查更新一直显示HTTP403时，请手动下载一次0.1.8。
 
 <details>
 <summary>展开查看更新说明与使用提醒</summary>
 
-本版新增GitHub自动检查更新。
+### 本版改进
+
+- **更新检查403**：优先读取GitHub公开签名索引，减少API额度影响；限额提示包含可重试时间，并提供简洁下载页。签名损坏时仍拒绝安装。
+- **已读与新回复**：打开成功后标记已读；论坛回复数增加时标记“有新回复”，不冒充精确未读数量。
+- **继续上次阅读**：保存页码及具体楼层，重启或再次打开可继续阅读；按账号隔离，保留最近100条。“只看楼主”不覆盖完整帖子的进度，可点“从头阅读”重置。
+- **页码导航**：点击页码直接输入，支持首页／末页、全角数字及Enter；总页数未知时不猜末页。粘贴链接保留页码，支持`page=e`末页链接。
+- **交互整理**：刷新同页列表保留内容并显示加载／重试状态；账号切换清空旧阅读内容；增加Ctrl／Command + L打开链接和回到本页顶部；更新弹窗在无新版说明时缩短。三种主题在980×620窗口检查分页控件和弹窗布局。
+
+内置使用说明已同步更新。以上读取与UI操作不会自动发帖或回复。
 
 ### 自动更新
 
@@ -29,10 +37,10 @@ Windows数据位于EXE同级`data`，Mac位于`~/Library/Application Support/NGA
 
 ### 验证范围与安全状态
 
-- 回归测试覆盖签名篡改、版本与平台选择、草稿保存、发送期间禁止更新、失败处理、重启前释放目录锁及设置兼容；Windows已在隔离目录执行MyGo真实替换并核对模拟数据保持原样。未替换用户正在使用的程序。
+- 回归测试覆盖签名索引／API限额、失败关闭、阅读记录迁移、账号与筛选隔离、楼层恢复及手动滚动、页码输入和原生控件。Windows更新使用隔离程序目录和模拟数据验证，不替换用户正在使用的程序。
 - GitHub Actions在Windows x64、macOS arm64与Intel环境测试、构建和检查包结构，Mac检查ad-hoc签名。这些检查不覆盖全部真实GUI操作；Mac实际更新仍需真机使用核验。
 - Windows没有Authenticode签名；Mac仅有ad-hoc完整性签名，没有Apple Developer ID或公证。更新签名不等同于系统代码签名，系统仍可能阻止启动。
-- 早期Windows 0.1.2曾被360检出，0.1.2/0.1.3复核未通过且未提供具体依据。**0.1.7尚无360放行结论**；功能测试、更新签名与源码公开不能代替恶意软件鉴定。
+- 早期Windows 0.1.2曾被360检出，0.1.2/0.1.3复核未通过且未提供具体依据。**0.1.8尚无360放行结论**；功能测试、更新签名与源码公开不能代替恶意软件鉴定。
 - `SHA256SUMS.txt`核对三份ZIP和六份更新资产的下载内容，不构成安全认证；包内保留MIT及依赖许可。
 
 </details>

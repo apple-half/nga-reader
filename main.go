@@ -17,7 +17,7 @@ import (
 	"ngareader/internal/nga"
 )
 
-const appVersion = "0.1.7"
+const appVersion = "0.1.8"
 
 func main() {
 	licenses := flag.Bool("licenses", false, "输出程序内嵌的第三方许可后退出")
