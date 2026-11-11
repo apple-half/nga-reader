@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/egoist/mygo"
@@ -15,6 +16,8 @@ import (
 	"ngareader/internal/local"
 	"ngareader/internal/nga"
 )
+
+const appVersion = "0.1.5"
 
 func main() {
 	licenses := flag.Bool("licenses", false, "输出程序内嵌的第三方许可后退出")
@@ -33,7 +36,19 @@ func main() {
 	}
 	dir := *directory
 	if dir == "" {
-		dir = filepath.Join(filepath.Dir(exe), "data")
+		configRoot := ""
+		if runtime.GOOS == "darwin" {
+			configRoot, err = os.UserConfigDir()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "无法确定 macOS 用户数据目录：", err)
+				return
+			}
+		}
+		dir, err = defaultDataDirectory(exe, runtime.GOOS, configRoot)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return
+		}
 	}
 	dir, err = filepath.Abs(dir)
 	if err != nil {
@@ -61,7 +76,7 @@ func main() {
 		return
 	}
 	mygo.App.SetName("NGAReader")
-	mygo.App.SetVersion("0.1.4")
+	mygo.App.SetVersion(appVersion)
 	mygo.App.SetMenu(nil)
 	mygo.App.SetPath(mygo.PathUserData, filepath.Join(dir, "runtime"))
 	mygo.App.SetPath(mygo.PathCache, filepath.Join(dir, "cache"))

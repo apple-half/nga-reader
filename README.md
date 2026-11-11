@@ -6,6 +6,18 @@
 
 这是独立的非官方项目，与 NGA、OpenAI / Codex 均无隶属关系。
 
+## 下载免安装版
+
+[v0.1.5 便携预发布](https://github.com/apple-half/nga-reader/releases/tag/v0.1.5)：
+
+| 系统 | 下载 | 使用方法 |
+| --- | --- | --- |
+| Windows x64 | [Windows 便携 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.5/NGAReader-0.1.5-Windows-x64-portable.zip) | 解压整个文件夹，双击 `NGAReader.exe` |
+| Mac Apple 芯片（M 系列） | [Apple 芯片 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.5/NGAReader-0.1.5-macOS-AppleSilicon-portable.zip) | 解压后打开 `NGAReader.app` |
+| Mac Intel | [Intel ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.5/NGAReader-0.1.5-macOS-Intel-portable.zip) | 解压后打开 `NGAReader.app` |
+
+无需安装向导或管理员权限。Mac 最低 macOS 12，不强制复制到 Applications。可用 Release 的 `SHA256SUMS.txt` 核对下载内容。程序没有商业代码签名或 Apple 公证，且尚无本版的 360 放行结论，详见下方安全说明。
+
 ## 界面预览
 
 ![三栏深色界面](docs/images/three-column.png)
@@ -38,7 +50,7 @@ go vet ./...
 ./release/NgaReader.exe
 ```
 
-程序为便携版。将 EXE 放进可写文件夹即可运行；设置与本机加密会话保存在 EXE 同级的 `data` 目录。
+以上为开发用单文件构建。Windows 设置与本机加密会话保存在 EXE 同级 `data` 目录，文件夹需可写；Mac 保存在 `~/Library/Application Support/NGAReader`，不写入 `.app` 包内。
 
 离线演示：
 
@@ -62,7 +74,15 @@ macOS / Linux 交叉编译：
 ./build.ps1 -TargetOS linux -Arch amd64 -OutputDirectory ./release-linux
 ```
 
-当前实际运行验证以 Windows x64 为主；macOS / Linux 仅做过交叉编译验证。对应平台的窗口、系统凭据和 WebView 行为需要在真实系统上测试。
+生成含系统图标、文件属性和 Mac App Bundle 的便携发布包：
+
+```powershell
+go run github.com/egoist/mygo/cmd/mygo build -platform windows/amd64 -skip-installer -skip-dmg -skip-notarize
+python packaging/package.py --target windows-amd64
+# Mac 上可将平台改为 darwin/arm64 或 darwin/amd64；target 改为 darwin-arm64 或 darwin-amd64
+```
+
+该命令使用 go.mod 固定的 MyGo CLI 版本；Python 只用标准库。正式 Release 工作流在 Windows 和两种芯片的 Mac 环境分别测试、构建和校验，Mac 使用系统 codesign 做 ad-hoc 签名。跨系统编译可生成 App Bundle，但 Mac 签名需在 macOS 上完成。真实账号登录、系统凭据、WebView 验证与完整 GUI 使用仍需真机验证；Linux 不在本次便携 Release 范围。
 
 ## 开始阅读
 
@@ -79,7 +99,7 @@ macOS / Linux 交叉编译：
 
 官方网页、图床验证及系统代理配置可能引发相应网络请求。本项目遵守论坛登录、权限和频率限制，不提供绕过验证、发帖、投票或批量操作功能。
 
-**杀毒状态：** Windows 0.1.2 构建曾被 360 检出为 `Trojan.Win64.SilverFox.ZAX`。包含 0.1.2 / 0.1.3 样本的复核申请未通过；收到的回复未给出具体检出依据。当前代码版本为 0.1.4，尚无该版本的 360 放行结论。公开源码、功能测试及依赖漏洞扫描不能替代恶意软件鉴定。本次开源仅发布源码和演示图，不附预编译 EXE。详情见 [安全说明](SECURITY.md)。
+**杀毒状态：** Windows 0.1.2 构建曾被 360 检出为 `Trojan.Win64.SilverFox.ZAX`。包含 0.1.2 / 0.1.3 样本的复核申请未通过；收到的回复未给出具体检出依据。当前版本为 0.1.5，尚无该版本的 360 放行结论。Windows 程序没有 Authenticode 签名，Mac 只有 ad-hoc 完整性签名，没有 Developer ID 签名或 Apple 公证，系统可能阻止启动。公开源码、功能测试、校验值及依赖漏洞扫描不能替代恶意软件鉴定。详情见 [安全说明](SECURITY.md)。
 
 ## 开发与验证
 

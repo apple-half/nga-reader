@@ -1,0 +1,20 @@
+{
+  "name": "NGAReader",
+  "slug": "nga-reader",
+  "identifier": "io.github.apple-half.ngareader",
+  "version": "0.1.5",
+  "publisher": "apple-half",
+  "copyright": "Copyright (c) 2026 apple-half",
+  "license": "MIT",
+  "icon": "packaging/icon.png",
+  "out": "build",
+  "resources": ["LICENSE", "LICENSES"],
+  "resourcesExclude": ["login-ui.js", "login-ui.test.cjs", "usage.md", "third-party.txt"],
+  "macos": {
+    "minimumSystemVersion": "12.0",
+    "signingIdentity": "-"
+  },
+  "windows": {
+    "displayName": "NGA Reader 工作台"
+  }
+}
