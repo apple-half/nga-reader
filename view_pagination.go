@@ -55,7 +55,7 @@ func (a *reader) readerNavigation(c *ui.Context, p palette) {
 			if a.onlyAuthor {
 				label = "显示全部"
 			}
-			ui.Button(c, label).FontSize(11).Padding(3, 5).Disabled(!ready || a.thread.MainAuthorID == 0).OnClick(func() { a.onlyAuthor = !a.onlyAuthor; a.loadThread(1) })
+			ui.Button(c, label).FontSize(11).Padding(3, 5).Disabled(!ready || a.thread.MainAuthorID == 0).OnClick(a.toggleAuthorFilter)
 			iconButton(c, "thread-top", "top", "回到本页顶部", !ready || a.scroll.Y <= 1).OnClick(a.readingToTop)
 			iconButton(c, "original", "link", "在浏览器打开原帖", a.selected.ID <= 0 || a.demo).OnClick(a.openOriginal)
 		})

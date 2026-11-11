@@ -13,6 +13,7 @@ type readingRestore struct {
 	TopicID, UID int64
 	Page         int
 	Position     local.ReadingPosition
+	Quiet        bool
 }
 type readingRow struct {
 	Post   nga.Post
@@ -127,8 +128,6 @@ func (a *reader) observeReadingView(c *ui.Context, viewport ui.Rect, rows []read
 		return
 	}
 	uid := a.readingUID()
-	stable := s.TopicID == a.selected.ID && s.UID == uid && s.Page == a.thread.Page && s.Font == a.state.FontSize && s.Width == viewport.W && math.Abs(float64(s.Y-a.scroll.Y)) < .25
-	s.TopicID, s.UID, s.Page, s.Font, s.Width, s.Y = a.selected.ID, uid, a.thread.Page, a.state.FontSize, viewport.W, a.scroll.Y
 	if viewport.H <= 0 {
 		if s.Warm < 2 {
 			s.Warm++
@@ -136,6 +135,18 @@ func (a *reader) observeReadingView(c *ui.Context, viewport ui.Rect, rows []read
 		}
 		return
 	}
+	samePage := s.TopicID == a.selected.ID && s.UID == uid && s.Page == a.thread.Page
+	geometryChanged := samePage && s.Font > 0 && s.Width > 0 && (s.Font != a.state.FontSize || s.Width != viewport.W)
+	if geometryChanged && s.Pending == nil {
+		// Native TrackScroll retains pixels through reflow. Preserve the last
+		// visible post instead, and restore it once after committed layout.
+		if r, ok := local.FindReading(a.state.History, a.selected.ID, uid); ok && r.Page == a.thread.Page && r.Position != nil {
+			s.Pending = &readingRestore{TopicID: a.selected.ID, UID: uid, Page: r.Page, Position: *r.Position, Quiet: true}
+			s.Warm = 0
+		}
+	}
+	stable := samePage && !geometryChanged && math.Abs(float64(s.Y-a.scroll.Y)) < .25
+	s.TopicID, s.UID, s.Page, s.Font, s.Width, s.Y = a.selected.ID, uid, a.thread.Page, a.state.FontSize, viewport.W, a.scroll.Y
 	if !stable {
 		c.Invalidate()
 		return
@@ -177,7 +188,9 @@ func (a *reader) observeReadingView(c *ui.Context, viewport ui.Rect, rows []read
 		if target >= 0 {
 			r := rows[target]
 			a.scroll.Y = max(0, a.scroll.Y+r.Bounds.Y-viewport.Y+p.Position.Fraction*r.Bounds.H)
-			a.notify(fmt.Sprintf("已继续阅读到第%d楼，可点击“从头阅读”重新开始。", r.Post.Floor))
+			if !p.Quiet {
+				a.notify(fmt.Sprintf("已继续阅读到第%d楼，可点击“从头阅读”重新开始。", r.Post.Floor))
+			}
 		} else {
 			a.scroll.Y = 0
 			a.notify("上次楼层已变化，已回到本页开头。")

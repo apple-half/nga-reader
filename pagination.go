@@ -102,17 +102,41 @@ func (a *reader) startReadingFromBeginning() {
 	}
 	a.flushReadingProgress()
 	a.linkLastTopic = 0
+	a.reading = readingViewState{Settling: 2}
+	a.scroll.Y = 0
+	if a.thread.Page != 1 || a.threadErr != nil {
+		// The successful response commits the reset. A failed or cancelled
+		// request must keep the previous full-thread reading record.
+		a.loadThreadAt(1, true)
+	} else {
+		a.clearReadingPosition()
+		a.save()
+	}
+}
+func (a *reader) clearReadingPosition() {
+	if a.onlyAuthor {
+		return
+	}
 	if r, ok := local.FindReading(a.state.History, a.selected.ID, a.readingUID()); ok {
 		r.Page = 1
 		r.Position = nil
 		r.Scoped = true
 		r.UID = a.readingUID()
 		a.state.History = local.PutReading(a.state.History, r)
-		a.save()
 	}
-	a.reading = readingViewState{Settling: 2}
-	a.scroll.Y = 0
-	if a.thread.Page != 1 || a.threadErr != nil {
+}
+func (a *reader) toggleAuthorFilter() {
+	if a.navigationBusy() || a.loadingThread || a.selected.ID <= 0 {
+		return
+	}
+	if a.onlyAuthor {
+		a.onlyAuthor = false
+		page := a.beginReadingTopic(a.selected.ID)
+		a.loadThread(page)
+	} else {
+		a.flushReadingProgress()
+		a.reading = readingViewState{}
+		a.onlyAuthor = true
 		a.loadThread(1)
 	}
 }

@@ -93,17 +93,26 @@ func (a *reader) selectTopicPage(t nga.Topic, page int) {
 	a.loadThread(page)
 }
 func (a *reader) loadThread(page int) {
+	a.loadThreadAt(page, false)
+}
+func (a *reader) loadThreadAt(page int, fromStart bool) {
 	if a.selected.ID <= 0 {
 		a.notify("这个条目是板块或合集入口，请使用板块链接添加")
 		return
 	}
 	a.prepareReadingLoad(page)
+	if fromStart {
+		a.reading.Pending = nil
+	}
 	a.scroll = ui.ScrollState{}
 	a.threadErr = nil
 	if a.demo {
 		a.thread = demoThread(a.selected.ID)
 		a.loadingThread = false
 		a.resetMarkdown()
+		if fromStart {
+			a.clearReadingPosition()
+		}
 		a.rememberReading()
 		return
 	}
@@ -165,6 +174,9 @@ func (a *reader) loadThread(page int) {
 				}
 			}
 			a.resetMarkdown()
+			if fromStart {
+				a.clearReadingPosition()
+			}
 			a.rememberReading()
 		})
 	})
