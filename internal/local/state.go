@@ -18,9 +18,13 @@ type Board struct {
 	CustomName bool   `json:"customName,omitempty"`
 }
 type Reading struct {
-	Topic nga.Topic `json:"topic"`
-	Page  int       `json:"page"`
-	At    time.Time `json:"at"`
+	Topic        nga.Topic        `json:"topic"`
+	Page         int              `json:"page"`
+	At           time.Time        `json:"at"`
+	UID          int64            `json:"uid,omitempty"`
+	Scoped       bool             `json:"scoped,omitempty"`
+	RepliesKnown bool             `json:"repliesKnown,omitempty"`
+	Position     *ReadingPosition `json:"position,omitempty"`
 }
 type State struct {
 	Boards           []Board     `json:"boards"`
@@ -76,9 +80,7 @@ func normalize(s *State) {
 	}
 	s.SidebarWidth = min(280, max(160, s.SidebarWidth))
 	s.TopicWidth = min(450, max(240, s.TopicWidth))
-	if len(s.History) > 100 {
-		s.History = s.History[:100]
-	}
+	s.History = normalizeReadings(s.History)
 	if len(s.Favorites) > 300 {
 		s.Favorites = s.Favorites[:300]
 	}

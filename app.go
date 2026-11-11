@@ -68,6 +68,7 @@ type reader struct {
 	loadingFavorites, importAfterLogin            bool
 	listState                                     ui.ListState
 	scroll                                        ui.ScrollState
+	reading                                       readingViewState
 	md                                            *markdown.Options
 	rendered                                      []renderedPost
 	settingsOpen, addOpen, linkOpen, cookieOpen   bool
@@ -162,20 +163,6 @@ func (a *reader) toggleFavorite() {
 	}
 	a.save()
 }
-func (a *reader) rememberReading() {
-	if a.selected.ID <= 0 {
-		return
-	}
-	history := []local.Reading{{Topic: a.selected, Page: max(1, a.thread.Page), At: time.Now()}}
-	for _, h := range a.state.History {
-		if h.Topic.ID != a.selected.ID && len(history) < 100 {
-			history = append(history, h)
-		}
-	}
-	a.state.History = history
-	a.state.LastTopic = a.selected.ID
-	a.save()
-}
 func (a *reader) displayTopics() []nga.Topic {
 	items := a.topics.Topics
 	if a.mode == "favorites" {
@@ -183,7 +170,7 @@ func (a *reader) displayTopics() []nga.Topic {
 	}
 	if a.mode == "history" {
 		items = nil
-		for _, h := range a.state.History {
+		for _, h := range local.VisibleReadings(a.state.History, a.readingUID()) {
 			items = append(items, h.Topic)
 		}
 	}
@@ -213,6 +200,7 @@ func (a *reader) shutdown() {
 		return
 	}
 	a.closing = true
+	a.flushReadingProgress()
 	a.saveComposer()
 	a.cancel()
 	a.updateGate.Close()

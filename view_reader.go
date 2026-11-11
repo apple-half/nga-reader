@@ -31,7 +31,8 @@ func (a *reader) readerPane(c *ui.Context, p palette) {
 		if a.selected.ID <= 0 {
 			a.emptyReader(c, p)
 		} else {
-			ui.Scroll(c.Key(fmt.Sprintf("%d/%d/%t", a.selected.ID, a.thread.Page, a.onlyAuthor))).TrackScroll(&a.scroll).Grow(1).MinHeight(0).Padding(29, 32, 20, 32).Children(func() {
+			rows := []readingRow{}
+			viewport := ui.Scroll(c.Key(fmt.Sprintf("%d/%d/%t", a.selected.ID, a.thread.Page, a.onlyAuthor))).TrackScroll(&a.scroll).Grow(1).MinHeight(0).Padding(29, 32, 20, 32).Children(func() {
 				ui.Column(c).FillWidth().MaxWidth(760).Margin(0, ui.Auto).Gap(0).Children(func() {
 					category := a.board.Name
 					if a.demo {
@@ -74,7 +75,7 @@ func (a *reader) readerPane(c *ui.Context, p palette) {
 								ui.Text(c, label).FontSize(12).FontWeight(500).Grow(1)
 							})
 						}
-						ui.Column(c.Key(post.post.Floor)).FillWidth().Gap(0).Margin(0, 0, 23, 0).Children(func() {
+						row := ui.Column(c.Key(post.post.Floor)).FillWidth().Gap(0).Margin(0, 0, 23, 0).Children(func() {
 							ui.Row(c).Gap(9).Margin(0, 0, 12, 0).Children(func() {
 								initial := "?"
 								if chars := []rune(post.post.Author); len(chars) > 0 {
@@ -97,12 +98,14 @@ func (a *reader) readerPane(c *ui.Context, p palette) {
 							})
 							markdown.View(c, post.source, a.md).FillWidth()
 						})
+						rows = append(rows, readingRow{Post: post.post, Bounds: row.Bounds()})
 					}
 					if len(a.rendered) == 0 {
 						ui.Text(c, "这一页没有可显示的回复").TextColor(c.Theme().TextMuted)
 					}
 				})
 			})
+			a.observeReadingView(c, viewport.Bounds(), rows)
 		}
 		ui.Row(c).Height(45).Padding(0, 17).Gap(6).BorderWidth(1, 0, 0, 0).BorderColor(c.Theme().Border).Children(func() {
 			if a.selected.ID > 0 {

@@ -178,6 +178,10 @@ func (a *reader) startUpdateChecks() {
 	}()
 }
 func (a *reader) saveBeforeUpdate() bool {
+	if !a.flushReadingProgress() {
+		a.updates.Error = "阅读位置未能保存，已停止更新。"
+		return false
+	}
 	if a.compose.Sending {
 		a.updates.Error = "正在发表帖子，请等发送结束后再更新。"
 		return false

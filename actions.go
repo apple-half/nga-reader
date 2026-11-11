@@ -14,6 +14,8 @@ import (
 )
 
 func (a *reader) selectBoard(board local.Board) {
+	a.flushReadingProgress()
+	a.reading = readingViewState{}
 	a.mode = "board"
 	a.board = board
 	a.state.LastBoard = board.ID
@@ -67,15 +69,7 @@ func (a *reader) loadTopics(page int) {
 	}()
 }
 func (a *reader) selectTopic(t nga.Topic) {
-	page := 1
-	if a.mode == "history" {
-		for _, h := range a.state.History {
-			if h.Topic.ID == t.ID {
-				page = max(1, h.Page)
-				break
-			}
-		}
-	}
+	page := a.beginReadingTopic(t.ID)
 	a.selected = t
 	a.onlyAuthor = false
 	a.scroll = ui.ScrollState{}
@@ -86,6 +80,7 @@ func (a *reader) loadThread(page int) {
 		a.notify("这个条目是板块或合集入口，请使用板块链接添加")
 		return
 	}
+	a.prepareReadingLoad(page)
 	a.scroll = ui.ScrollState{}
 	a.threadErr = nil
 	if a.demo {
@@ -241,6 +236,7 @@ func (a *reader) toggleHidden() {
 		return
 	}
 	if a.win.IsVisible() {
+		a.flushReadingProgress()
 		a.win.Hide()
 	} else {
 		a.win.Show()

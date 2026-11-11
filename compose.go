@@ -228,6 +228,7 @@ func (a *reader) allowSessionChange() bool {
 		a.notify("正在发送，请等待论坛返回结果后再切换账号")
 		return false
 	}
+	a.flushReadingProgress()
 	return !a.compose.Open || a.closeComposer()
 }
 

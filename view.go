@@ -7,6 +7,7 @@ import (
 
 	"github.com/egoist/mygo/ui"
 	"github.com/egoist/mygo/ui/markdown"
+	"ngareader/internal/local"
 	"ngareader/internal/nga"
 )
 
@@ -233,6 +234,7 @@ func (a *reader) topicPane(c *ui.Context, p palette) {
 		a.listState.Label = func(i int) string { return items[i].Title }
 		ui.List(c, &a.listState, len(items), func(i int) {
 			t := items[i]
+			seen, changed := local.ReadStatus(a.state.History, t, a.readingUID())
 			row := ui.ButtonBase(c.Key(t.ID)).Label(t.Title).FillWidth().Padding(13, 11).Margin(2, 7).Radius(7)
 			if a.state.Theme == "NGA经典屎黄色" && i%2 == 0 {
 				row.Background(p.side)
@@ -245,10 +247,17 @@ func (a *reader) topicPane(c *ui.Context, p palette) {
 			row.Children(func() {
 				ui.Column(c).FillWidth().Gap(8).Children(func() {
 					title := ui.Text(c, t.Title).FontSize(13).LineHeight(1.65).MaxLines(2)
-					if a.state.Theme == "NGA经典屎黄色" {
+					if seen && !changed && t.ID != a.selected.ID {
+						title.TextColor(c.Theme().TextMuted)
+					} else if a.state.Theme == "NGA经典屎黄色" {
 						title.TextColor(p.accent)
 					}
 					ui.Row(c).Gap(5).Children(func() {
+						if changed {
+							ui.Text(c, "有新回复").FontSize(10).TextColor(p.accent).Tooltip("回复数比上次查看时增加，不代表精确未读楼数")
+						} else if seen {
+							ui.Text(c, "已读").FontSize(10).TextColor(c.Theme().TextMuted)
+						}
 						author := t.Author
 						if author == "" {
 							author = "匿名用户"
