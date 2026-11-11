@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -33,8 +34,10 @@ type Offer struct {
 	Prerelease bool
 }
 type Client struct {
-	http *http.Client
-	pub  ed25519.PublicKey
+	http       *http.Client
+	pub        ed25519.PublicKey
+	mu         sync.Mutex
+	apiRetryAt time.Time
 }
 
 func NewClient(client *http.Client, pub ed25519.PublicKey) *Client {
@@ -51,7 +54,7 @@ func NewClient(client *http.Client, pub ed25519.PublicKey) *Client {
 			return fmt.Errorf("更新下载跳转被拒绝")
 		}
 		switch r.URL.Host {
-		case "api.github.com", "github.com", "release-assets.githubusercontent.com", "objects.githubusercontent.com":
+		case "api.github.com", "github.com", "release-assets.githubusercontent.com", "objects.githubusercontent.com", "raw.githubusercontent.com":
 			return nil
 		}
 		return fmt.Errorf("更新下载跳转到了未知地址")
@@ -74,7 +77,7 @@ func (c *Client) get(ctx context.Context, address string, limit int64) ([]byte, 
 	return raw, nil
 }
 func (c *Client) open(ctx context.Context, address string) (io.ReadCloser, error) {
-	if address != "https://api.github.com/repos/"+Repository+"/releases?per_page=30" && !SafeAssetURL(address) {
+	if address != "https://api.github.com/repos/"+Repository+"/releases?per_page=30" && !SafeAssetURL(address) && !safeFeedURL(address) {
 		return nil, fmt.Errorf("更新地址不属于指定GitHub仓库")
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, address, nil)
@@ -83,17 +86,31 @@ func (c *Client) open(ctx context.Context, address string) (io.ReadCloser, error
 	}
 	req.Header.Set("User-Agent", "NGAReader-Updater")
 	req.Header.Set("Accept", "application/vnd.github+json")
+	if req.URL.Host == "api.github.com" {
+		c.mu.Lock()
+		retryAt := c.apiRetryAt
+		c.mu.Unlock()
+		if time.Now().Before(retryAt) {
+			return nil, &HTTPError{Status: 403, RetryAt: retryAt, RateLimited: true}
+		}
+	}
 	resp, err := c.http.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("连接GitHub失败：%w", err)
 	}
 	if resp.StatusCode != 200 {
 		resp.Body.Close()
-		return nil, fmt.Errorf("GitHub返回HTTP%d，请稍后重试", resp.StatusCode)
+		failure := responseError(resp, time.Now())
+		if req.URL.Host == "api.github.com" && failure.RateLimited {
+			c.mu.Lock()
+			c.apiRetryAt = failure.RetryAt
+			c.mu.Unlock()
+		}
+		return nil, failure
 	}
 	return resp.Body, nil
 }
-func (c *Client) Latest(ctx context.Context, current, target string) (*Offer, error) {
+func (c *Client) latestAPI(ctx context.Context, current, target string) (*Offer, error) {
 	if _, err := parseVersion(current); err != nil {
 		return nil, err
 	}

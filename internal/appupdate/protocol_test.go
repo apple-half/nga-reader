@@ -96,16 +96,16 @@ func TestUpdateCatalogSkipsIncompleteAndWrongPlatformAndRejectsTampering(t *test
 		}
 		return &http.Response{StatusCode: 200, Header: make(http.Header), Body: ioCloser(body)}, nil
 	})}, pub)
-	offer, err := c.Latest(context.Background(), "0.1.7", "windows-amd64")
+	offer, err := c.latestAPI(context.Background(), "0.1.7", "windows-amd64")
 	if err != nil || offer == nil || offer.Manifest.Version != "0.1.8" || requests != 2 {
 		t.Fatalf("offer=%+v requests=%d err=%v", offer, requests, err)
 	}
 	tamper = true
-	if _, err := c.Latest(context.Background(), "0.1.7", "windows-amd64"); err == nil {
+	if _, err := c.latestAPI(context.Background(), "0.1.7", "windows-amd64"); err == nil {
 		t.Fatal("tampered download accepted")
 	}
 	tamper = false
-	if offer, err := c.Latest(context.Background(), "0.1.8", "windows-amd64"); err != nil || offer != nil {
+	if offer, err := c.latestAPI(context.Background(), "0.1.8", "windows-amd64"); err != nil || offer != nil {
 		t.Fatalf("downgrade/same version offered: %+v %v", offer, err)
 	}
 }
@@ -116,7 +116,7 @@ func TestUpdateCatalogRejectsForeignAssetAndHTTPFailure(t *testing.T) {
 		c := NewClient(&http.Client{Transport: testTransport(func(r *http.Request) (*http.Response, error) {
 			return &http.Response{StatusCode: status, Header: make(http.Header), Body: ioCloser([]byte("error"))}, nil
 		})}, pub)
-		if _, err := c.Latest(context.Background(), "0.1.7", "windows-amd64"); err == nil {
+		if _, err := c.latestAPI(context.Background(), "0.1.7", "windows-amd64"); err == nil {
 			t.Fatal("HTTP error became success")
 		}
 	}
@@ -300,7 +300,7 @@ func TestUpdateCatalogSortsVersionsAcrossInvalidTags(t *testing.T) {
 		}
 		return &http.Response{StatusCode: 200, Header: make(http.Header), Body: ioCloser(raw)}, nil
 	})}, pub)
-	offer, err := c.Latest(context.Background(), "0.1.7", "windows-amd64")
+	offer, err := c.latestAPI(context.Background(), "0.1.7", "windows-amd64")
 	if err != nil || offer == nil || offer.Manifest.Version != "0.1.9" {
 		t.Fatalf("newest version missed: %+v %v", offer, err)
 	}
