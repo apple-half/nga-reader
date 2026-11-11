@@ -14,12 +14,19 @@ def gh(*args):
 
 
 def release(repo, tag, missing_ok=False):
-    result = subprocess.run(['gh', 'api', f'repos/{repo}/releases/tags/{tag}'], capture_output=True, text=True)
+    # The tag endpoint only finds published releases. Authenticated listings also
+    # contain drafts, including the one that must be verified before exposure.
+    result = subprocess.run(['gh', 'api', '--paginate', '--slurp', f'repos/{repo}/releases?per_page=100'], capture_output=True, text=True)
     if result.returncode:
-        if missing_ok and 'HTTP 404' in result.stderr:
-            return None
         raise RuntimeError(result.stderr)
-    return json.loads(result.stdout)
+    matches = [item for page in json.loads(result.stdout) for item in page if item['tag_name'] == tag]
+    if len(matches) > 1:
+        raise RuntimeError('Multiple releases found for tag: ' + tag)
+    if matches:
+        return matches[0]
+    if missing_ok:
+        return None
+    raise RuntimeError('Release not found: ' + tag)
 
 
 def main():

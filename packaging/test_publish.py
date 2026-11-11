@@ -1,11 +1,41 @@
 import hashlib
+import json
 import os
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
 
 import publish
+
+
+class ReleaseLookupTests(unittest.TestCase):
+    def test_finds_draft_when_published_tag_endpoint_returns_404(self):
+        draft = {'id': 42, 'tag_name': 'v0.1.5', 'draft': True}
+
+        def api(command, **kwargs):
+            if '/releases/tags/' in command[-1]:
+                return subprocess.CompletedProcess(command, 1, '', 'gh: Not Found (HTTP 404)')
+            self.assertIn('--paginate', command)
+            self.assertIn('--slurp', command)
+            return subprocess.CompletedProcess(command, 0, json.dumps([[{'tag_name': 'v0.1.6'}], [draft]]), '')
+
+        with patch.object(publish.subprocess, 'run', side_effect=api):
+            self.assertEqual(publish.release('example/reader', 'v0.1.5'), draft)
+
+    def test_missing_release_is_only_optional_after_successful_lookup(self):
+        result = subprocess.CompletedProcess([], 0, '[[]]', '')
+        with patch.object(publish.subprocess, 'run', return_value=result):
+            self.assertIsNone(publish.release('example/reader', 'v0.1.5', missing_ok=True))
+            with self.assertRaisesRegex(RuntimeError, 'not found'):
+                publish.release('example/reader', 'v0.1.5')
+
+    def test_lookup_permission_failure_is_not_treated_as_missing_release(self):
+        result = subprocess.CompletedProcess([], 1, '', 'gh: Resource not accessible (HTTP 403)')
+        with patch.object(publish.subprocess, 'run', return_value=result):
+            with self.assertRaisesRegex(RuntimeError, 'HTTP 403'):
+                publish.release('example/reader', 'v0.1.5', missing_ok=True)
 
 
 class PublishTests(unittest.TestCase):
