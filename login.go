@@ -30,6 +30,9 @@ func (a *reader) adoptLoginCookies(values []*http.Cookie) error {
 	if !a.allowSessionChange() {
 		return errors.New("正在发送或草稿保存失败，暂时不能切换登录会话")
 	}
+	if a.client.SessionUID() != temporary.SessionUID() {
+		a.resetReadingSession()
+	}
 	a.client.SetCookies(temporary.Cookies())
 	return nil
 }
@@ -321,6 +324,9 @@ func (a *reader) importSession() {
 		a.returnToLive()
 	}
 	a.state.RememberLogin = remember
+	if a.client.SessionUID() != temporary.SessionUID() {
+		a.resetReadingSession()
+	}
 	a.client.SetCookies(temporary.Cookies())
 	a.favoriteGate.Begin(a.ctx)
 	a.loadingFavorites = false

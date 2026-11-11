@@ -95,7 +95,10 @@ func navButton(c *ui.Context, key, icon, label, count string, selected bool, p p
 }
 func (a *reader) view(c *ui.Context) {
 	p := a.theme(c)
-	if c.Shortcut(0, ui.KeyF5) {
+	if !a.modalOpen() && !a.navigationBusy() && c.Shortcut(ui.Cmd, ui.KeyL) {
+		a.openLinkDialog()
+	}
+	if !a.modalOpen() && !a.navigationBusy() && c.Shortcut(0, ui.KeyF5) {
 		if a.selected.ID > 0 {
 			a.loadThread(max(1, a.thread.Page))
 		} else {
@@ -120,6 +123,7 @@ func (a *reader) view(c *ui.Context) {
 	a.helpDialog(c)
 	a.composerView(c)
 	a.updatesView(c)
+	a.pageJumpView(c)
 }
 
 func (a *reader) titlebar(c *ui.Context, p palette) {
@@ -230,6 +234,14 @@ func (a *reader) topicPane(c *ui.Context, p palette) {
 			iconButton(c, "open-link", "link", "打开帖子链接", false).OnClick(func() { a.linkOpen = true; a.formError = "" })
 		})
 		items := a.displayTopics()
+		if a.mode == "board" && a.topicErr != nil {
+			ui.Row(c).Padding(4, 14).Gap(6).Children(func() {
+				ui.Text(c, "加载失败："+errorMessage(a.topicErr)).FontSize(11).TextColor(c.Theme().TextMuted).MaxLines(2).Grow(1)
+				ui.Button(c, "重试").Label("重试话题列表").FontSize(11).Padding(4, 6).OnClick(func() { a.loadTopics(max(1, a.topics.Page)) })
+			})
+		} else if a.mode == "board" && a.loadingTopics && len(items) > 0 {
+			ui.Text(c, "正在刷新，暂时显示上一份列表…").FontSize(11).TextColor(c.Theme().TextMuted).Padding(3, 14)
+		}
 		a.listState.Key = func(i int) any { return items[i].ID }
 		a.listState.Label = func(i int) string { return items[i].Title }
 		ui.List(c, &a.listState, len(items), func(i int) {
@@ -274,7 +286,7 @@ func (a *reader) topicPane(c *ui.Context, p palette) {
 				if a.loadingTopics && a.mode == "board" {
 					message = "正在加载话题…"
 				} else if a.topicErr != nil && a.mode == "board" {
-					message = errorMessage(a.topicErr)
+					message = "暂时无法加载话题，请点击上方重试"
 				} else if a.filter != "" {
 					message = "没有匹配的话题"
 				} else if a.mode == "favorites" {
@@ -288,7 +300,7 @@ func (a *reader) topicPane(c *ui.Context, p palette) {
 		ui.Row(c).Height(44).Padding(0, 10).Gap(5).BorderWidth(1, 0, 0, 0).BorderColor(c.Theme().Border).Children(func() {
 			ui.Textf(c, "%d 条话题", len(items)).FontSize(11).TextColor(c.Theme().TextMuted).Grow(1)
 			iconButton(c, "list-prev", "left", "上一页话题", a.mode != "board" || a.loadingTopics || a.topics.Page <= 1 || a.demo).OnClick(func() { a.loadTopics(a.topics.Page - 1) })
-			ui.Textf(c, "%d", max(1, a.topics.Page)).FontSize(11).TextColor(c.Theme().TextMuted)
+			ui.Button(c, fmt.Sprintf("第%d页", max(1, a.topics.Page))).Label("跳转话题页码").FontSize(11).Padding(4, 6).Disabled(a.mode != "board" || a.loadingTopics || a.demo).OnClick(func() { a.openPageJump(false) })
 			iconButton(c, "list-next", "right", "下一页话题", a.mode != "board" || a.loadingTopics || !a.topics.HasNext || a.demo).OnClick(func() { a.loadTopics(a.topics.Page + 1) })
 		})
 	})

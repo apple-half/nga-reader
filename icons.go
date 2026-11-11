@@ -14,6 +14,7 @@ func svg(path string) *ui.SVG {
 }
 
 var icons = map[string]*ui.SVG{
+	"top":      svg(`<path d="M5 5h14M12 20V9m-5 5 5-5 5 5"/>`),
 	"app":      svg(`<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/>`),
 	"topics":   svg(`<path d="M21 11a7 7 0 0 1-7 7H8l-5 3V9a7 7 0 0 1 7-7h4a7 7 0 0 1 7 7Z"/>`),
 	"bookmark": svg(`<path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16l-6-4Z"/>`),

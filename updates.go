@@ -296,7 +296,7 @@ func (a *reader) openUpdateRelease() {
 	if a.win == nil || a.updates.Installing || a.updates.Restarting {
 		return
 	}
-	address := "https://github.com/" + appupdate.Repository + "/releases"
+	address := "https://github.com/" + appupdate.Repository + "/blob/main/DOWNLOAD.md"
 	if a.updates.Offer != nil {
 		address = a.updates.Offer.Info().ReleaseURL
 	}

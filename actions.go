@@ -16,6 +16,7 @@ import (
 func (a *reader) selectBoard(board local.Board) {
 	a.flushReadingProgress()
 	a.reading = readingViewState{}
+	a.linkLastTopic = 0
 	a.mode = "board"
 	a.board = board
 	a.state.LastBoard = board.ID
@@ -40,9 +41,11 @@ func (a *reader) loadTopics(page int) {
 	ctx, token := a.topicGate.Begin(a.ctx)
 	a.loadingTopics = true
 	a.topicErr = nil
-	a.topics = nga.TopicPage{Page: page}
+	if a.topicSourceFID != a.board.ID || a.topics.Page != page {
+		a.topics = nga.TopicPage{Page: page}
+	}
 	fid := a.board.ID
-	go func() {
+	a.readTask(func() {
 		result, err := a.client.Topics(ctx, fid, page)
 		a.update(func() {
 			if !a.topicGate.Accept(token) {
@@ -56,6 +59,7 @@ func (a *reader) loadTopics(page int) {
 				return
 			}
 			a.topics = result
+			a.topicSourceFID = fid
 			if result.BoardName != "" && !a.board.CustomName {
 				a.board.Name = result.BoardName
 				for i := range a.state.Boards {
@@ -66,10 +70,23 @@ func (a *reader) loadTopics(page int) {
 				a.save()
 			}
 		})
-	}()
+	})
 }
 func (a *reader) selectTopic(t nga.Topic) {
-	page := a.beginReadingTopic(t.ID)
+	a.selectTopicPage(t, 0)
+}
+func (a *reader) selectTopicPage(t nga.Topic, page int) {
+	a.linkLastTopic = 0
+	if page == 0 {
+		page = a.beginReadingTopic(t.ID)
+	} else {
+		a.flushReadingProgress()
+		a.reading = readingViewState{}
+		if page < 0 {
+			page = 1
+			a.linkLastTopic = t.ID
+		}
+	}
 	a.selected = t
 	a.onlyAuthor = false
 	a.scroll = ui.ScrollState{}
@@ -106,7 +123,7 @@ func (a *reader) loadThread(page int) {
 	}
 	a.thread = nga.ThreadPage{Topic: selected, Page: page, MainAuthorID: authorID}
 	a.resetMarkdown()
-	go func() {
+	a.readTask(func() {
 		result, err := a.client.Thread(ctx, selected.ID, page, authorID)
 		a.update(func() {
 			if !a.threadGate.Accept(token) {
@@ -140,10 +157,17 @@ func (a *reader) loadThread(page int) {
 			}
 			a.thread = result
 			a.selected = result.Topic
+			if a.linkLastTopic == selected.ID {
+				a.linkLastTopic = 0
+				if (result.TotalRows > 0 || result.PagesKnown) && result.TotalPages > 1 {
+					a.loadThread(result.TotalPages)
+					return
+				}
+			}
 			a.resetMarkdown()
 			a.rememberReading()
 		})
-	}()
+	})
 }
 func (a *reader) openLink(address string) {
 	address = strings.TrimSpace(address)
@@ -156,7 +180,24 @@ func (a *reader) openLink(address string) {
 	}
 	if tid, fid, err := nga.ParseLink(address); err == nil {
 		if tid > 0 {
-			a.selectTopic(nga.Topic{ID: tid, FID: a.board.ID, Title: fmt.Sprintf("话题 #%d", tid)})
+			page := 0
+			if u, err := url.Parse(address); err == nil && u.Query().Get("page") != "" {
+				value := u.Query().Get("page")
+				if value == "e" {
+					page = -1
+				} else {
+					parsed, err := parsePageInput(value, 0)
+					if err != nil {
+						a.notify(err.Error())
+						return
+					}
+					page = parsed
+				}
+			}
+			if fid == 0 {
+				fid = a.board.ID
+			}
+			a.selectTopicPage(nga.Topic{ID: tid, FID: fid, Title: fmt.Sprintf("话题 #%d", tid)}, page)
 			return
 		}
 		if fid != 0 {

@@ -9,7 +9,11 @@ import (
 func (a *reader) updatesView(c *ui.Context) {
 	panel := ui.DialogBase(c.Key("github-updates"), &a.updates.Open, func(backdrop, panel ui.Element) {
 		backdrop.Background(ui.RGBA(0, 0, 0, .5))
-		panel.Width(650).MaxWidthPercent(94).Height(500).MaxHeightPercent(92).Padding(22).Radius(14).Gap(14).Background(c.Theme().Background).Border(1, c.Theme().Border)
+		height := float32(370)
+		if a.updates.Offer != nil {
+			height = 500
+		}
+		panel.Width(650).MaxWidthPercent(94).Height(height).MaxHeightPercent(92).Padding(22).Radius(14).Gap(14).Background(c.Theme().Background).Border(1, c.Theme().Border)
 		s := &a.updates
 		busy := s.Installing || s.Restarting
 		ui.Row(c).Gap(10).Children(func() {
@@ -59,7 +63,7 @@ func (a *reader) updatesView(c *ui.Context) {
 		ui.Checkbox(c, &a.state.AutoCheckUpdates, "启动时自动检查更新").Disabled(busy || a.demo).OnChange(a.save)
 		ui.Divider(c)
 		ui.Row(c).Gap(8).Wrap().Children(func() {
-			ui.Button(c, "查看发布页").Disabled(busy || a.demo).OnClick(a.openUpdateRelease)
+			ui.Button(c, "打开下载页").Disabled(busy || a.demo).OnClick(a.openUpdateRelease)
 			ui.Button(c, "重新检查").Disabled(s.Checking || busy || s.ReadyToRestart || a.demo).OnClick(func() { a.checkUpdates(true) })
 			ui.Spacer(c).Grow(1)
 			if s.ReadyToRestart {

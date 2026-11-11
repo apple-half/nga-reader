@@ -107,28 +107,7 @@ func (a *reader) readerPane(c *ui.Context, p palette) {
 			})
 			a.observeReadingView(c, viewport.Bounds(), rows)
 		}
-		ui.Row(c).Height(45).Padding(0, 17).Gap(6).BorderWidth(1, 0, 0, 0).BorderColor(c.Theme().Border).Children(func() {
-			if a.selected.ID > 0 {
-				label := fmt.Sprintf("第 %d 页 · %d 条回复", max(1, a.thread.Page), a.selected.Replies)
-				if a.thread.TotalRows == 0 && !a.loadingThread && a.threadErr == nil {
-					label = fmt.Sprintf("第 %d 页 · 本页 %d 楼", max(1, a.thread.Page), len(a.rendered))
-				}
-				ui.Text(c, label).FontSize(11).TextColor(c.Theme().TextMuted).Grow(1)
-			} else {
-				ui.Text(c, "选择一个话题，开始阅读").FontSize(11).TextColor(c.Theme().TextMuted).Grow(1)
-			}
-			if a.selected.ID > 0 {
-				label := "只看楼主"
-				if a.onlyAuthor {
-					label = "显示全部"
-				}
-				ui.Button(c, label).FontSize(11).Padding(4, 7).Disabled(a.loadingThread || a.thread.MainAuthorID == 0).OnClick(func() { a.onlyAuthor = !a.onlyAuthor; a.loadThread(1) })
-			}
-			iconButton(c, "original", "link", "在浏览器打开原帖", a.selected.ID <= 0 || a.demo).OnClick(func() { a.openOriginal() })
-			iconButton(c, "thread-prev", "left", "上一页回复", a.selected.ID <= 0 || a.loadingThread || a.thread.Page <= 1 || a.demo).OnClick(func() { a.loadThread(a.thread.Page - 1) })
-			ui.Textf(c, "%d / %d", max(1, a.thread.Page), max(1, a.thread.TotalPages)).FontSize(11).TextColor(c.Theme().TextMuted)
-			iconButton(c, "thread-next", "right", "下一页回复", a.selected.ID <= 0 || a.loadingThread || a.thread.Page >= a.thread.TotalPages || a.demo).OnClick(func() { a.loadThread(a.thread.Page + 1) })
-		})
+		a.readerNavigation(c, p)
 	})
 }
 func (a *reader) emptyReader(c *ui.Context, p palette) {

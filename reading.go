@@ -27,6 +27,31 @@ type readingViewState struct {
 	SaveAt                     time.Time
 }
 
+func (a *reader) readTask(fn func()) {
+	if a.runReadTask != nil {
+		a.runReadTask(fn)
+	} else {
+		go fn()
+	}
+}
+func (a *reader) resetReadingSession() {
+	a.flushReadingProgress()
+	a.topicGate.Begin(a.ctx)
+	a.threadGate.Begin(a.ctx)
+	a.selected = nga.Topic{}
+	a.thread = nga.ThreadPage{}
+	a.topics = nga.TopicPage{}
+	a.reading = readingViewState{}
+	a.linkLastTopic = 0
+	a.topicSourceFID = 0
+	a.loadingTopics = false
+	a.loadingThread = false
+	a.threadErr = nil
+	a.topicErr = nil
+	a.jump.Open = false
+	a.resetMarkdown()
+}
+
 func (a *reader) readingUID() int64 { return a.client.SessionUID() }
 func (a *reader) beginReadingTopic(id int64) int {
 	a.flushReadingProgress()

@@ -118,6 +118,7 @@ func ParseThreadHTML(raw []byte, tid int64, page int) (ThreadPage, error) {
 				return fail()
 			}
 			result.TotalPages, per, foundPages = total, size, true
+			result.PagesKnown = true
 		}
 		const init = "commonui.userInfo.setAll("
 		if at := strings.Index(s, init); at >= 0 {

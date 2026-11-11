@@ -150,3 +150,23 @@ func TestReadingFailedOrCancelledThreadDoesNotMarkRead(t *testing.T) {
 		t.Fatal("failed thread was marked read")
 	}
 }
+
+func TestAccountChangeClearsPreviousReaderAndCancelsRequests(t *testing.T) {
+	a := newReader(t.TempDir())
+	defer a.cancel()
+	if err := a.client.ImportCookieHeader("ngaPassportUid=123; ngaPassportCid=synthetic"); err != nil {
+		t.Fatal(err)
+	}
+	a.selected = nga.Topic{ID: 99, Title: "之前账号的帖子"}
+	a.thread = nga.ThreadPage{Topic: a.selected, Posts: []nga.Post{{Content: "旧内容"}}}
+	a.resetMarkdown()
+	_, token := a.threadGate.Begin(a.ctx)
+	a.loadingThread = true
+	values := []*http.Cookie{{Name: "ngaPassportUid", Value: "456", Domain: "bbs.nga.cn", Path: "/"}, {Name: "ngaPassportCid", Value: "synthetic-new", Domain: "bbs.nga.cn", Path: "/"}}
+	if err := a.adoptLoginCookies(values); err != nil {
+		t.Fatal(err)
+	}
+	if a.selected.ID != 0 || len(a.rendered) != 0 || a.loadingThread || a.threadGate.Accept(token) {
+		t.Fatal("old account reading remained active")
+	}
+}

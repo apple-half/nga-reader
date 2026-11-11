@@ -46,6 +46,7 @@ type reader struct {
 	hot                                           bool
 	board                                         local.Board
 	topics                                        nga.TopicPage
+	topicSourceFID                                int64
 	thread                                        nga.ThreadPage
 	selected                                      nga.Topic
 	loadingTopics, loadingThread                  bool
@@ -69,6 +70,9 @@ type reader struct {
 	listState                                     ui.ListState
 	scroll                                        ui.ScrollState
 	reading                                       readingViewState
+	jump                                          pageJumpState
+	linkLastTopic                                 int64
+	runReadTask                                   func(func())
 	md                                            *markdown.Options
 	rendered                                      []renderedPost
 	settingsOpen, addOpen, linkOpen, cookieOpen   bool

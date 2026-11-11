@@ -69,21 +69,16 @@ func (a *reader) dialogs(c *ui.Context, p palette) {
 		ui.Row(c).Justify(ui.End).Children(func() { ui.PrimaryButton(c, "添加并打开").OnClick(a.addBoard) })
 	})
 	dialog(c, &a.linkOpen, "打开帖子链接", func() {
-		ui.TextInput(c, &a.linkInput).Label("NGA 帖子链接").Placeholder("https://bbs.nga.cn/read.php?tid=…").MaxLength(1200).AutoFocus()
+		input := ui.TextInput(c, &a.linkInput).Label("NGA 帖子链接").Placeholder("https://bbs.nga.cn/read.php?tid=…").MaxLength(1200).AutoFocus()
 		if a.formError != "" {
 			ui.Text(c, a.formError).FontSize(12).TextColor(c.Theme().Danger)
 		}
 		ui.Row(c).Justify(ui.End).Children(func() {
-			ui.PrimaryButton(c, "打开").OnClick(func() {
-				if _, _, err := nga.ParseLink(a.linkInput); err != nil {
-					a.formError = err.Error()
-					return
-				}
-				a.linkOpen = false
-				a.formError = ""
-				a.openLink(a.linkInput)
-			})
+			ui.PrimaryButton(c, "打开").OnClick(a.submitLink)
 		})
+		if input.Submitted() {
+			a.submitLink()
+		}
 	})
 	dialog(c, &a.cookieOpen, "导入本机会话", func() {
 		ui.Text(c, "从自己已登录的 NGA 浏览器会话中复制 Cookie 值，在这里本地导入。它可以访问你的账号，请勿发到聊天或交给他人。").FontSize(12).TextColor(c.Theme().TextMuted).LineHeight(1.7)
@@ -132,6 +127,7 @@ func (a *reader) signOut() {
 	a.loadingFavorites = false
 	a.topicGate.Begin(a.ctx)
 	a.threadGate.Begin(a.ctx)
+	a.resetReadingSession()
 	a.client.SetCookies(nil)
 	a.state.RememberLogin = false
 	if a.keys != nil {

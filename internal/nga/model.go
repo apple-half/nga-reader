@@ -31,6 +31,7 @@ type TopicPage struct {
 }
 
 type ThreadPage struct {
+	PagesKnown   bool
 	Topic        Topic
 	Posts        []Post
 	Page         int
