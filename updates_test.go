@@ -179,18 +179,18 @@ func TestUpdateCheckErrorsAndDemoDoNotTriggerInstall(t *testing.T) {
 func TestUpdateCheckScheduleAndRenamedExeFallback(t *testing.T) {
 	a, _, _ := updateTestReader(t)
 	now := time.Now()
-	if !a.shouldCheckUpdates(now) {
+	if !a.shouldCheckUpdates() {
 		t.Fatal("first check skipped")
 	}
 	a.state.LastUpdateCheck = now
-	if a.shouldCheckUpdates(now.Add(time.Hour)) {
-		t.Fatal("checks too frequent")
+	if !a.shouldCheckUpdates() {
+		t.Fatal("persisted timestamp suppressed startup check")
 	}
-	if !a.shouldCheckUpdates(now.Add(25 * time.Hour)) {
+	if !a.shouldCheckUpdates() {
 		t.Fatal("daily check missing")
 	}
 	a.state.AutoCheckUpdates = false
-	if a.shouldCheckUpdates(now.Add(48 * time.Hour)) {
+	if a.shouldCheckUpdates() {
 		t.Fatal("disabled checks still run")
 	}
 	if installationReason("windows", "C:/app/Work.exe", true) == "" {
@@ -230,5 +230,62 @@ func TestUpdateSessionSaveCannotReenterInstallation(t *testing.T) {
 	a.installUpdate()
 	if !lockedDuringSave || offer.installs != 1 {
 		t.Fatalf("native save reentered updater: locked=%t installs=%d", lockedDuringSave, offer.installs)
+	}
+}
+
+func TestUpdateRestartFreezesActionsBeforeNativeSave(t *testing.T) {
+	a, _, _ := updateTestReader(t)
+	a.updates.ReadyToRestart = true
+	a.state.RememberLogin = true
+	if err := a.client.ImportCookieHeader("ngaPassportUid=123; ngaPassportCid=synthetic"); err != nil {
+		t.Fatal(err)
+	}
+	relaunches, postingWorkers := 0, 0
+	a.relaunchUpdate = func() { relaunches++ }
+	a.runPosting = func(func()) { postingWorkers++ }
+	closeAllowed, sessionAllowed := false, false
+	a.keys = &reentrantUpdateKeys{hook: func() {
+		closeAllowed = a.canCloseForUpdate()
+		sessionAllowed = a.allowSessionChange()
+		a.restartUpdate()
+		a.openComposer(nga.PostTarget{Action: "new", FID: -7}, "板块")
+	}}
+	a.restartUpdate()
+	if relaunches != 1 || postingWorkers != 0 || a.compose.Open || closeAllowed || sessionAllowed {
+		t.Fatalf("restart reentered: launches=%d posts=%d open=%t close=%t session=%t", relaunches, postingWorkers, a.compose.Open, closeAllowed, sessionAllowed)
+	}
+	if !a.closing || !a.canCloseForUpdate() {
+		t.Fatal("intended relaunch cannot quit")
+	}
+}
+
+func TestUpdateNonzeroCheckDurationDoesNotSkipAutomaticTick(t *testing.T) {
+	a, _, _ := updateTestReader(t)
+	started := time.Now()
+	a.state.LastUpdateCheck = started.Add(2 * time.Second)
+	if !a.shouldCheckUpdates() {
+		t.Fatal("next daily timer tick skipped after nonzero check duration")
+	}
+	a.updates.Checking = true
+	if a.shouldCheckUpdates() {
+		t.Fatal("overlapping check allowed")
+	}
+}
+
+func TestUpdateRestartSaveFailureClearsGuard(t *testing.T) {
+	a, _, _ := updateTestReader(t)
+	a.updates.ReadyToRestart = true
+	if err := os.WriteFile(filepath.Join(a.dir, "settings.json"), []byte("old"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	bad := filepath.Join(a.dir, "not-a-directory")
+	if err := os.WriteFile(bad, []byte("x"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	a.dir = bad
+	a.relaunchUpdate = func() { t.Fatal("restart despite failed save") }
+	a.restartUpdate()
+	if a.updates.Restarting || a.closing || !a.canCloseForUpdate() || a.updates.Error == "" {
+		t.Fatal("failed save left restart locked")
 	}
 }

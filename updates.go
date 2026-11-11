@@ -33,6 +33,7 @@ type updateEngine interface {
 }
 type updateState struct {
 	Open, Checking, Installing, ReadyToRestart bool
+	Restarting                                 bool
 	Offer                                      updateOffer
 	Error, Message                             string
 	Downloaded, Total                          int64
@@ -152,8 +153,10 @@ func (a *reader) checkUpdates(manual bool) {
 		})
 	})
 }
-func (a *reader) shouldCheckUpdates(now time.Time) bool {
-	return a.state.AutoCheckUpdates && !a.demo && !a.closing && !a.updates.Checking && !a.updates.Installing && !a.updates.ReadyToRestart && (a.state.LastUpdateCheck.IsZero() || a.state.LastUpdateCheck.After(now) || now.Sub(a.state.LastUpdateCheck) >= 24*time.Hour)
+func (a *reader) shouldCheckUpdates() bool {
+	// The timer owns the startup/daily cadence. A completion timestamp must not
+	// suppress the next tick or a fresh startup's explicitly requested check.
+	return a.state.AutoCheckUpdates && !a.demo && !a.closing && !a.updates.Checking && !a.updates.Installing && !a.updates.ReadyToRestart
 }
 func (a *reader) startUpdateChecks() {
 	go func() {
@@ -165,7 +168,7 @@ func (a *reader) startUpdateChecks() {
 				return
 			case <-timer.C:
 				a.update(func() {
-					if a.shouldCheckUpdates(time.Now()) {
+					if a.shouldCheckUpdates() {
 						a.checkUpdates(false)
 					}
 				})
@@ -252,6 +255,14 @@ func (a *reader) installUpdate() {
 	})
 }
 func (a *reader) canCloseForUpdate() bool {
+	if a.closing {
+		return true
+	} // The guarded, intended relaunch may quit.
+	if a.updates.Restarting {
+		a.updates.Open = true
+		a.updates.Error = "正在保存并重启，请稍候。"
+		return false
+	}
 	if a.updates.Installing {
 		a.updates.Open = true
 		a.updates.Error = "正在安装更新，请等待完成后再退出。"
@@ -260,7 +271,14 @@ func (a *reader) canCloseForUpdate() bool {
 	return true
 }
 func (a *reader) restartUpdate() {
-	if !a.updates.ReadyToRestart || !a.canCloseForUpdate() || !a.saveBeforeUpdate() {
+	if !a.updates.ReadyToRestart || a.updates.Installing || a.updates.Restarting || a.closing {
+		return
+	}
+	// Secret storage can pump native events. Freeze posting/session/quit before
+	// any save, and retain the guard until shutdown has released ownership.
+	a.updates.Restarting = true
+	if !a.saveBeforeUpdate() {
+		a.updates.Restarting = false
 		return
 	}
 	a.shutdown() // Releases directory ownership before MyGo starts the new process.
@@ -271,7 +289,7 @@ func (a *reader) restartUpdate() {
 	}
 }
 func (a *reader) openUpdateRelease() {
-	if a.win == nil || a.updates.Installing {
+	if a.win == nil || a.updates.Installing || a.updates.Restarting {
 		return
 	}
 	address := "https://github.com/" + appupdate.Repository + "/releases"

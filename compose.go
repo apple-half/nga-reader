@@ -48,7 +48,7 @@ func (a *reader) postTask(fn func()) {
 }
 
 func (a *reader) openComposer(target nga.PostTarget, label string) {
-	if a.updates.Installing {
+	if a.updates.Installing || a.updates.Restarting || a.closing {
 		a.notify("正在安装更新，请等待完成后再发帖")
 		return
 	}
@@ -220,7 +220,7 @@ func (a *reader) closeComposer() bool {
 }
 
 func (a *reader) allowSessionChange() bool {
-	if a.updates.Installing {
+	if a.updates.Installing || a.updates.Restarting || a.closing {
 		a.notify("正在安装更新，请等待完成后再切换账号")
 		return false
 	}
@@ -307,7 +307,7 @@ func (a *reader) confirmComposerPublished() {
 }
 
 func (a *reader) sendComposer() {
-	if a.updates.Installing {
+	if a.updates.Installing || a.updates.Restarting || a.closing {
 		return
 	}
 	if a.demo || !a.compose.Open || a.compose.Sending || a.compose.Preparing || !a.compose.Ready {
