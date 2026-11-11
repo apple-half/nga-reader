@@ -46,7 +46,7 @@ def safe_member(name, mode):
     parts = PurePosixPath(name).parts
     if '\\' in name or name.startswith('/') or '..' in parts or stat.S_ISLNK(mode):
         raise ValueError('Unsafe archive path: ' + name)
-    if any(p.lower() in {'data', 'cache', 'logs', 'runtime', '.git', '__pycache__'} for p in parts):
+    if any(p.lower() in {'data', 'cache', 'logs', 'runtime', '.git', '__pycache__'} for p in parts) or PurePosixPath(name).name.lower() in {'drafts.json', 'settings.json', 'session.enc'}:
         raise ValueError('Local data must not ship: ' + name)
     if name.lower().endswith(('.enc', '.log', '.jsonl', '.dmg', '.pkg', '.msi')) or PurePosixPath(name).name.lower().startswith(('setup', 'uninstall', 'install.')):
         raise ValueError('Unexpected private data or installer: ' + name)

@@ -27,30 +27,30 @@
 
 **Files:** internal/nga/post.go, post_test.go; client.go.
 **Interfaces:** PostTarget{Action,FID,TID,PID}; PreparePost(ctx,target)(PostPreparation,error); PublishPost(ctx,preparation,subject,content)(PublishResult,error); SessionUID()int64; PublishError.Uncertain.
-- [ ] Write failing httptest cases for UTF8/output8, preparation identity/scope, quotes, GB18030, explicit success/refusal, HTML/invalid results, redirects and lost responses without retry.
-- [ ] Run focused tests and observe RED.
-- [ ] Implement bounded parsing, isolated non-replaying transport and structured result classification.
-- [ ] Run package tests and observe GREEN; commit.
+- [x] Write failing httptest cases for UTF8/output8, preparation identity/scope, quotes, GB18030, explicit success/refusal, HTML/invalid results, redirects and lost responses without retry.
+- [x] Run focused tests and observe RED.
+- [x] Implement bounded parsing, isolated non-replaying transport and structured result classification.
+- [x] Run package tests and observe GREEN; commit.
 
 ### Task 2: Persisted draft/send state
 
 **Files:** internal/local/drafts.go, drafts_test.go.
 **Interfaces:** Draft{UID,Target,Subject,Content,Uncertain,UpdatedAt}; LoadDrafts/SaveDrafts(dir,[]Draft); DraftKey; state helper for begin/result/acknowledge.
-- [ ] Write failing tests for per-account/per-target restoration, limits/corruption handling, uncertain persistence, success removal and duplicate suppression.
-- [ ] Observe RED, implement using existing atomicWrite, verify GREEN; commit.
+- [x] Write failing tests for per-account/per-target restoration, limits/corruption handling, uncertain persistence, success removal and duplicate suppression.
+- [x] Observe RED, implement using existing atomicWrite, verify GREEN; commit.
 
 ### Task 3: Native composer
 
 **Files:** compose.go, view_compose.go, compose_test.go; app.go, view.go, view_reader.go, view_settings.go, demo.go.
 **Interfaces:** openComposer(target,label), prepareComposer, sendComposer, saveComposer, closeComposer; use Task1/2 types.
-- [ ] Write UI/state tests for new/reply/quote entry, preserved board binding, demo no-network, send lock, no Enter submission, prepared quote/draft precedence, signout and uncertain retry confirmation.
-- [ ] Observe RED; build editor, classification selector, actions and callbacks; test GREEN.
-- [ ] Render editor previews at1280x820 and980x620 in dark/light/NGA classic; fix visual defects and commit.
+- [x] Write UI/state tests for new/reply/quote entry, preserved board binding, demo no-network, send lock, no Enter submission, prepared quote/draft precedence, signout and uncertain retry confirmation.
+- [x] Observe RED; build editor, classification selector, actions and callbacks; test GREEN.
+- [x] Render editor previews at1280x820 and980x620 in dark/light/NGA classic; fix visual defects and commit.
 
 ### Task 4: Documentation, verification and portable delivery
 
 **Files:** main.go, mygo.json, README.md, SECURITY.md, resources/usage.md, packaging/release-notes.md, workflow dispatch version default.
-- [ ] Run full Go tests/vet, Node login tests, Python publisher tests, actionlint and private-data scan.
+- [x] Run full Go tests/vet, Node login tests, Python publisher tests, actionlint and private-data scan.
 - [ ] Complete one independent code review and fix blocking findings with regression tests.
 - [ ] Bump to0.1.6, build/verify Windows and both Mac architectures with existing CI; create new immutable tag and complete public release.
 - [ ] Download all three ZIPs, verify CRC/architectures/licenses/signature envelopes/SHA256SUMS; report links and real-account verification boundary.

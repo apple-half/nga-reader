@@ -1,24 +1,27 @@
-Windows 和 macOS 的首个免安装便携预发布版本。
+本版新增原生文字发帖、普通回复和引用回复，继续提供 Windows 与两种芯片的 Mac 免安装 ZIP。
 
 | 系统 | 下载文件 | 使用方法 |
 | --- | --- | --- |
-| Windows x64 | `NGAReader-0.1.5-Windows-x64-portable.zip` | 解压整个文件夹，双击 `NGAReader.exe` |
-| macOS Apple 芯片（M 系列） | `NGAReader-0.1.5-macOS-AppleSilicon-portable.zip` | 解压后打开 `NGAReader.app` |
-| macOS Intel | `NGAReader-0.1.5-macOS-Intel-portable.zip` | 解压后打开 `NGAReader.app` |
+| Windows x64 | `NGAReader-0.1.6-Windows-x64-portable.zip` | 解压整个文件夹，双击 `NGAReader.exe` |
+| macOS Apple 芯片（M 系列） | `NGAReader-0.1.6-macOS-AppleSilicon-portable.zip` | 解压后打开 `NGAReader.app` |
+| macOS Intel | `NGAReader-0.1.6-macOS-Intel-portable.zip` | 解压后打开 `NGAReader.app` |
 
-这些包不包含安装向导，不需要管理员权限。macOS 最低版本为 12；不强制将 App 复制到 Applications。下方 GitHub 自动生成的 Source code 文件是源码，运行程序请下载上表中的 ZIP。
+Mac 最低 macOS 12，不强制复制到 Applications。下方 GitHub 自动生成的 Source code 是源码，运行程序请下载上表中的 ZIP。更新前退出旧版并保留原数据目录。
 
-本版新增正式应用图标、Windows 产品与版本属性、macOS App Bundle，以及 Mac 用户数据目录修正。保留三栏原生阅读、收藏板块导入、NGA经典屎黄色主题、图片按需展示和正文兼容读取。
+**发帖与回复**
 
-Windows 设置与加密会话保存在 EXE 同级 `data` 目录；更新时保留该目录。Mac 保存在 `~/Library/Application Support/NGAReader`，避免写入 App 包内。两种系统的加密会话通常不能跨电脑直接复用。
+- 中栏板块名称旁点击“发帖”，填写标题、分类和正文；正文顶部点击“回复”；各层点击“引用回复”。
+- 编辑器原生绘制，沿用深色、浅色和 NGA经典屎黄色主题。支持文字和 NGA BBCode，暂不上传图片。Enter 只换行，点击按钮才提交。
+- 草稿按账号和目标自动保存。关闭编辑器后，重新点击同一目标即可继续编辑。草稿以明文保存在本机 `drafts.json`，请勿公开分享；最多32份，标题128字、正文20000字，论坛可能有更严格限制。
+- 发送期间锁定编辑器与账号切换。连接中断或返回内容无法确认时，保留发送记录并阻止自动重发；先检查原帖或板块，再选择已发表清理，或确认未发表后手动解除保护。审核中会单独提示。
+- 论坛要求额外验证、登录或发言权限时会显示提示并保留正文，可打开官方页面处理。
 
-图片默认不加载，点击“展示图片”才打开。Windows 官方登录和图片预览需要电脑已有 WebView2 Runtime。完整说明在软件侧栏“使用说明”和 ZIP 内。
+Windows 数据保存在 EXE 同级 `data` 目录；Mac 保存在 `~/Library/Application Support/NGAReader`。图片默认折叠，点击后才加载；Windows 官方登录和图片预览需要已有 WebView2 Runtime。
 
 **验证范围与安全状态**
 
-- GitHub Actions 在 Windows x64、macOS arm64 和 macOS Intel 环境运行测试、构建及包结构检查；Mac 检查 ad-hoc 签名和命令行许可输出。这些检查不覆盖真实账号登录、验证码和全部 GUI 操作。
-- Windows 程序未做 Authenticode 签名；Mac 只有 ad-hoc 完整性签名，没有 Apple Developer ID 签名或 Apple 公证，系统可能阻止启动。
-- 早期 Windows 0.1.2 曾被 360 检出，0.1.2 / 0.1.3 复核未通过，收到的回复未提供具体判定依据。**0.1.5 尚无 360 放行结论，不能认定此前检出为误报。** 被拦截时请保留隔离并向厂商核实，不要关闭系统防护。
-- `SHA256SUMS.txt` 用于检查下载内容是否与本次发布一致，不构成安全认证。
-
-本项目采用 MIT 许可证，各依赖的许可原文包含在下载包中。
+- 本版使用模拟 HTTP 服务验证发帖协议、中文编码、权限拒绝、异常响应、账号/目标隔离、草稿恢复和防重复发送；使用原生渲染测试检查编辑器。未代真实账号发布测试帖子，特殊板块与验证码流程仍需实际使用核验。
+- GitHub Actions 在 Windows x64、macOS arm64 和 macOS Intel 环境运行测试、构建与包结构检查，Mac 另检查 ad-hoc 签名和许可输出；这些检查不覆盖全部真实 GUI 操作。
+- Windows 没有 Authenticode 签名；Mac 只有 ad-hoc 完整性签名，没有 Apple Developer ID 签名或公证，系统可能阻止启动。
+- 早期 Windows 0.1.2 曾被360检出，0.1.2/0.1.3复核未通过且未提供具体依据。**0.1.6 尚无360放行结论**；功能测试与源码公开不能代替恶意软件鉴定。遇到拦截请保留隔离并向厂商核实。
+- `SHA256SUMS.txt` 用于核对本次下载内容，不构成安全认证。包内包含 MIT 与全部依赖许可。

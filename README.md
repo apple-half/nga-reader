@@ -8,13 +8,13 @@
 
 ## 下载免安装版
 
-[v0.1.5 便携预发布](https://github.com/apple-half/nga-reader/releases/tag/v0.1.5)：
+[v0.1.6 便携预发布](https://github.com/apple-half/nga-reader/releases/tag/v0.1.6)：
 
 | 系统 | 下载 | 使用方法 |
 | --- | --- | --- |
-| Windows x64 | [Windows 便携 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.5/NGAReader-0.1.5-Windows-x64-portable.zip) | 解压整个文件夹，双击 `NGAReader.exe` |
-| Mac Apple 芯片（M 系列） | [Apple 芯片 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.5/NGAReader-0.1.5-macOS-AppleSilicon-portable.zip) | 解压后打开 `NGAReader.app` |
-| Mac Intel | [Intel ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.5/NGAReader-0.1.5-macOS-Intel-portable.zip) | 解压后打开 `NGAReader.app` |
+| Windows x64 | [Windows 便携 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.6/NGAReader-0.1.6-Windows-x64-portable.zip) | 解压整个文件夹，双击 `NGAReader.exe` |
+| Mac Apple 芯片（M 系列） | [Apple 芯片 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.6/NGAReader-0.1.6-macOS-AppleSilicon-portable.zip) | 解压后打开 `NGAReader.app` |
+| Mac Intel | [Intel ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.6/NGAReader-0.1.6-macOS-Intel-portable.zip) | 解压后打开 `NGAReader.app` |
 
 无需安装向导或管理员权限。Mac 最低 macOS 12，不强制复制到 Applications。可用 Release 的 `SHA256SUMS.txt` 核对下载内容。程序没有商业代码签名或 Apple 公证，且尚无本版的 360 放行结论，详见下方安全说明。
 
@@ -29,12 +29,20 @@
 ## 功能
 
 - 三栏阅读、帖子与回复独立分页、只看楼主、专注阅读。
+- 原生文字发帖、普通回复与引用回复，可选择发布板块和主题分类；暂不上传图片。
+- 按账号与目标自动保存草稿；发送前保留记录，超时后先核查结果，防止重复发表。
 - 导入 NGA 账号收藏的普通板块；本地收藏帖子、最近阅读、自定义板块。
 - 深色、浅色、跟随系统，以及「NGA经典屎黄色」主题。
 - 图片默认折叠，点击「展示图片」后才请求；关闭预览后释放临时 WebView。
 - 官方登录成功后返回阅读器；可选择在本机加密保存会话。
 - 个别帖子 JSON 数据不完整时，自动追加一次同站静态正文请求，继续原生阅读；不执行正文网页脚本。
 - 侧栏内置离线使用说明；支持 F5 刷新、Ctrl + Shift + Space 隐藏或恢复窗口。
+
+## 发帖与回复
+
+发帖入口在中栏板块标题旁；普通回复在正文顶部，引用回复在各楼层旁。Enter 只换行，点击发送按钮才发表。关闭编辑器会保留草稿，重新进入同一目标即可恢复；草稿以明文保存在本机 `drafts.json`，请勿公开分享。发送结果待确认时，可以检查后选择“确认已发表，清理草稿”，或确认未发表后解除重复发送保护。完整操作见软件内“使用说明”。
+
+新发帖功能已通过模拟 HTTP 服务和原生界面测试，未代真实账号发布测试帖子；特殊板块、验证码和服务端接口变化仍需实际使用核验。
 
 ## 构建与运行
 
@@ -99,7 +107,7 @@ python packaging/package.py --target windows-amd64
 
 官方网页、图床验证及系统代理配置可能引发相应网络请求。本项目遵守论坛登录、权限和频率限制，不提供绕过验证、发帖、投票或批量操作功能。
 
-**杀毒状态：** Windows 0.1.2 构建曾被 360 检出为 `Trojan.Win64.SilverFox.ZAX`。包含 0.1.2 / 0.1.3 样本的复核申请未通过；收到的回复未给出具体检出依据。当前版本为 0.1.5，尚无该版本的 360 放行结论。Windows 程序没有 Authenticode 签名，Mac 只有 ad-hoc 完整性签名，没有 Developer ID 签名或 Apple 公证，系统可能阻止启动。公开源码、功能测试、校验值及依赖漏洞扫描不能替代恶意软件鉴定。详情见 [安全说明](SECURITY.md)。
+**杀毒状态：** Windows 0.1.2 构建曾被 360 检出为 `Trojan.Win64.SilverFox.ZAX`。包含 0.1.2 / 0.1.3 样本的复核申请未通过；收到的回复未给出具体检出依据。当前版本为 0.1.6，尚无该版本的 360 放行结论。Windows 程序没有 Authenticode 签名，Mac 只有 ad-hoc 完整性签名，没有 Developer ID 签名或 Apple 公证，系统可能阻止启动。公开源码、功能测试、校验值及依赖漏洞扫描不能替代恶意软件鉴定。详情见 [安全说明](SECURITY.md)。
 
 ## 开发与验证
 

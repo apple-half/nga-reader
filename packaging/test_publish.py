@@ -3,11 +3,20 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import stat
 import tempfile
 import unittest
 from unittest.mock import patch
 
 import publish
+import package
+
+
+class ArchivePrivacyTests(unittest.TestCase):
+    def test_private_draft_and_settings_files_never_ship(self):
+        for name in ['NGAReader/drafts.json', 'NGAReader/settings.json', 'NGAReader.app/Contents/Resources/drafts.json']:
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, 'Local data'):
+                package.safe_member(name, stat.S_IFREG | 0o644)
 
 
 class ReleaseLookupTests(unittest.TestCase):

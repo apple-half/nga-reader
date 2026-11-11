@@ -78,7 +78,11 @@ func (a *reader) composerView(c *ui.Context) {
 				}
 				ui.TextArea(c.Key("compose-body"), &s.Draft.Content).Label("正文").Placeholder("写下你想说的话…\n支持文字和 NGA BBCode，不上传图片。").Height(210).FillWidth().MaxLength(nga.MaxPostContentRunes).Disabled(locked).OnChange(func() { a.saveComposer() })
 				ui.Row(c).Gap(8).Children(func() {
-					ui.Text(c, "Enter 换行 · 内容只保存于本机").FontSize(11).TextColor(c.Theme().TextMuted).Grow(1)
+					hint := "Enter 换行 · 草稿自动保存到本机"
+					if a.demo {
+						hint = "Enter 换行 · 离线演示"
+					}
+					ui.Text(c, hint).FontSize(11).TextColor(c.Theme().TextMuted).Grow(1)
 					ui.Textf(c, "%d / %d", utf8.RuneCountInString(s.Draft.Content), nga.MaxPostContentRunes).FontSize(11).TextColor(c.Theme().TextMuted)
 				})
 				if s.Preparing {
