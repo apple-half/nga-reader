@@ -8,7 +8,9 @@
 
 ## 下载免安装版
 
-[v0.1.7 便携预发布](https://github.com/apple-half/nga-reader/releases/tag/v0.1.7)：
+**[打开简洁下载页 → Windows / Mac 免安装版](DOWNLOAD.md)**
+
+当前版本：0.1.7 便携预发布。按系统选择下方 ZIP 即可：
 
 | 系统 | 下载 | 使用方法 |
 | --- | --- | --- |

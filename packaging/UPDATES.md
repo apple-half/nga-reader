@@ -14,7 +14,7 @@ go run github.com/egoist/mygo/cmd/mygo keygen -o ../update-signing
 
 ## 每次发布
 
-1. 修改`main.go`与`mygo.json`的版本，更新README、发布说明，运行全部检查后创建并推送对应`vX.Y.Z`标签。
+1. 修改`main.go`与`mygo.json`的版本，更新README、DOWNLOAD.md和发布说明中的版本与三份便携ZIP链接，运行全部检查后创建并推送对应`vX.Y.Z`标签。DOWNLOAD.md只展示用户需要的免安装包；更新器附件继续保留在Release原地址。
 2. Release工作流在Windows和两种Mac环境构建。三份便携ZIP和初始`SHA256SUMS.txt`上传到**草稿Release**，暂不公开。
 3. 从该草稿下载三份ZIP到同一个本地空目录，核对Actions来源、标签提交及SHA-256。私钥始终在目录之外。运行离线签名：
 
