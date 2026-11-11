@@ -1,0 +1,246 @@
+package main
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"net/url"
+	"strings"
+
+	"github.com/egoist/mygo"
+	"github.com/egoist/mygo/ui"
+	"ngareader/internal/local"
+	"ngareader/internal/nga"
+)
+
+func (a *reader) selectBoard(board local.Board) {
+	a.mode = "board"
+	a.board = board
+	a.state.LastBoard = board.ID
+	a.filter = ""
+	a.selected = nga.Topic{}
+	a.thread = nga.ThreadPage{}
+	a.rendered = nil
+	a.threadErr = nil
+	a.loadingThread = false
+	a.resetMarkdown()
+	a.onlyAuthor = false
+	a.threadGate.Begin(a.ctx)
+	a.listState = ui.ListState{}
+	a.save()
+	a.loadTopics(1)
+}
+func (a *reader) loadTopics(page int) {
+	if a.demo {
+		a.topics = demoTopics()
+		return
+	}
+	ctx, token := a.topicGate.Begin(a.ctx)
+	a.loadingTopics = true
+	a.topicErr = nil
+	a.topics = nga.TopicPage{Page: page}
+	fid := a.board.ID
+	go func() {
+		result, err := a.client.Topics(ctx, fid, page)
+		a.update(func() {
+			if !a.topicGate.Accept(token) {
+				return
+			}
+			a.loadingTopics = false
+			if err != nil {
+				if !errors.Is(err, context.Canceled) {
+					a.topicErr = err
+				}
+				return
+			}
+			a.topics = result
+			if result.BoardName != "" && !a.board.CustomName {
+				a.board.Name = result.BoardName
+				for i := range a.state.Boards {
+					if a.state.Boards[i].ID == fid {
+						a.state.Boards[i].Name = result.BoardName
+					}
+				}
+				a.save()
+			}
+		})
+	}()
+}
+func (a *reader) selectTopic(t nga.Topic) {
+	page := 1
+	if a.mode == "history" {
+		for _, h := range a.state.History {
+			if h.Topic.ID == t.ID {
+				page = max(1, h.Page)
+				break
+			}
+		}
+	}
+	a.selected = t
+	a.onlyAuthor = false
+	a.scroll = ui.ScrollState{}
+	a.loadThread(page)
+}
+func (a *reader) loadThread(page int) {
+	if a.selected.ID <= 0 {
+		a.notify("这个条目是板块或合集入口，请使用板块链接添加")
+		return
+	}
+	a.scroll = ui.ScrollState{}
+	a.threadErr = nil
+	if a.demo {
+		a.thread = demoThread(a.selected.ID)
+		a.loadingThread = false
+		a.resetMarkdown()
+		a.rememberReading()
+		return
+	}
+	ctx, token := a.threadGate.Begin(a.ctx)
+	a.loadingThread = true
+	selected := a.selected
+	knownMainAuthorID := selected.AuthorID
+	if a.thread.Topic.ID == selected.ID && a.thread.MainAuthorID != 0 {
+		knownMainAuthorID = a.thread.MainAuthorID
+	}
+	authorID := int64(0)
+	if a.onlyAuthor {
+		authorID = a.thread.MainAuthorID
+		if authorID == 0 {
+			authorID = selected.AuthorID
+		}
+	}
+	a.thread = nga.ThreadPage{Topic: selected, Page: page, MainAuthorID: authorID}
+	a.resetMarkdown()
+	go func() {
+		result, err := a.client.Thread(ctx, selected.ID, page, authorID)
+		a.update(func() {
+			if !a.threadGate.Accept(token) {
+				return
+			}
+			a.loadingThread = false
+			if err != nil {
+				if !errors.Is(err, context.Canceled) {
+					a.threadErr = err
+				}
+				return
+			}
+			if result.Topic.ID == 0 {
+				result.Topic.ID = selected.ID
+			}
+			if result.Topic.Title == "" {
+				result.Topic.Title = selected.Title
+			}
+			if result.Topic.FID == 0 {
+				result.Topic.FID = a.board.ID
+			}
+			if result.MainAuthorID == 0 {
+				result.MainAuthorID = knownMainAuthorID
+			}
+			if result.Topic.AuthorID == 0 {
+				result.Topic.AuthorID = selected.AuthorID
+				result.Topic.Author = selected.Author
+			}
+			if result.TotalRows == 0 {
+				result.Topic.Replies = selected.Replies
+			}
+			a.thread = result
+			a.selected = result.Topic
+			a.resetMarkdown()
+			a.rememberReading()
+		})
+	}()
+}
+func (a *reader) openLink(address string) {
+	address = strings.TrimSpace(address)
+	if safe, err := nga.ImageURL(address); err == nil {
+		a.openPicture(safe)
+		return
+	}
+	if strings.HasPrefix(address, "/") {
+		address = nga.BaseURL + address
+	}
+	if tid, fid, err := nga.ParseLink(address); err == nil {
+		if tid > 0 {
+			a.selectTopic(nga.Topic{ID: tid, FID: a.board.ID, Title: fmt.Sprintf("话题 #%d", tid)})
+			return
+		}
+		if fid != 0 {
+			b, _ := local.ParseBoard(fmt.Sprint(fid))
+			for _, existing := range a.state.Boards {
+				if existing.ID == fid {
+					b = existing
+				}
+			}
+			a.selectBoard(b)
+			return
+		}
+	}
+	u, err := url.Parse(address)
+	if err != nil || u.Scheme != "https" || u.Host == "" || u.User != nil {
+		a.notify("仅支持打开 HTTPS 链接")
+		return
+	}
+	if a.win != nil {
+		if err := mygo.Shell.OpenExternal(address); err != nil {
+			a.notify("无法打开链接：" + err.Error())
+		}
+	}
+}
+func (a *reader) addBoard() {
+	board, err := local.ParseBoard(a.boardInput)
+	if err != nil {
+		a.formError = err.Error()
+		return
+	}
+	if name := strings.TrimSpace(a.boardName); name != "" {
+		board.Name = name
+		board.CustomName = true
+	}
+	exists := false
+	for i, b := range a.state.Boards {
+		if b.ID == board.ID {
+			exists = true
+			a.state.Boards[i] = board
+		}
+	}
+	if !exists {
+		a.state.Boards = append(a.state.Boards, board)
+	}
+	a.addOpen = false
+	a.boardInput = ""
+	a.boardName = ""
+	a.formError = ""
+	a.selectBoard(board)
+}
+func (a *reader) returnToLive() {
+	if a.liveState != nil {
+		a.state = *a.liveState
+		a.liveState = nil
+	}
+	a.board = a.state.Boards[0]
+	for _, board := range a.state.Boards {
+		if board.ID == a.state.LastBoard {
+			a.board = board
+			break
+		}
+	}
+	a.applyAppearance()
+	a.demo = false
+	a.selected = nga.Topic{}
+	a.thread = nga.ThreadPage{}
+	a.resetMarkdown()
+	a.mode = "board"
+	a.filter = ""
+	a.loadTopics(1)
+}
+func (a *reader) toggleHidden() {
+	if a.win == nil {
+		return
+	}
+	if a.win.IsVisible() {
+		a.win.Hide()
+	} else {
+		a.win.Show()
+		a.win.Focus()
+	}
+}

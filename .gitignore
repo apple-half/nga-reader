@@ -1,0 +1,41 @@
+# Local user settings and encrypted account sessions
+data/
+**/session.enc
+**/settings.json
+**/settings.invalid-*.json
+**/.write-*
+**/runtime/
+**/cache/
+**/logs/
+*.enc
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.pfx
+*.p12
+
+# Development caches, diagnostics, and local build artifacts
+/work/
+/outputs/
+/release/
+/release-*/
+/dist/
+*.exe
+*.dll
+*.dylib
+*.so
+*.test
+*.out
+*.log
+*.jsonl
+*.zip
+coverage.*
+
+# Editor and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini
