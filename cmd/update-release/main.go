@@ -3,8 +3,10 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -23,6 +25,7 @@ func main() {
 	keyPath := f.String("key", "", "private key file for sign; public key file for verify")
 	notesPath := f.String("notes", "packaging/release-notes.md", "release notes file")
 	date := f.String("date", time.Now().UTC().Format(time.RFC3339), "UTC release date")
+	target := f.String("target", "windows-amd64", "platform for check")
 	f.Parse(os.Args[2:])
 	keyText, err := os.ReadFile(*keyPath)
 	if err != nil {
@@ -49,6 +52,23 @@ func main() {
 		if err := appupdate.VerifyDirectory(*dir, strings.TrimPrefix(*version, "v"), pub); err != nil {
 			fail(err)
 		}
+	} else if mode == "check" {
+		pub, err := appupdate.PublicKey(string(keyText))
+		if err != nil {
+			fail(err)
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+		defer cancel()
+		offer, err := appupdate.NewClient(&http.Client{Timeout: 40 * time.Second}, pub).Latest(ctx, *version, *target)
+		if err != nil {
+			fail(err)
+		}
+		if offer == nil {
+			fmt.Println("No higher signed version available")
+		} else {
+			fmt.Println("Verified GitHub signed update: " + offer.Manifest.Version + " / " + offer.Manifest.Target)
+		}
+		return
 	} else {
 		fail(fmt.Errorf("unknown operation"))
 	}

@@ -92,7 +92,7 @@ def readme(target):
     else:
         chip = 'Apple 芯片（M 系列）' if target == 'darwin-arm64' else 'Intel 芯片'
         start += f'适用于 macOS 12 或更高版本，{chip}。解压后打开 NGAReader.app，无需安装向导，也不强制复制到 Applications。\n设置与加密会话保存在 ~/Library/Application Support/NGAReader，不写入 .app 包内。\n本包仅有 ad-hoc 完整性签名，没有 Apple Developer ID 签名或 Apple 公证；macOS 可能阻止运行。请先核实来源与校验值，不要关闭系统防护。\n'
-    return start + '\n图片默认折叠，点击“展示图片”才加载；软件侧栏内置使用说明。\n\n早期 Windows 0.1.2 曾被360检出，0.1.2/0.1.3复核未通过且未提供具体判定依据。本版尚无360放行结论。功能测试及源码公开不构成恶意软件鉴定。若被拦截，保留隔离并向厂商核实。\n\n源码与问题反馈：https://github.com/apple-half/nga-reader\n'
+    return start + '\n软件启动后自动检查GitHub更新，有新版时提示；点击“下载并安装”才更新，完成后手动重启。可在侧栏“软件更新”关闭自动检查。更新保留数据目录；仅本次有效的登录重启后需重新登录。\n图片默认折叠，点击“展示图片”才加载；软件侧栏内置使用说明。\n\n早期 Windows 0.1.2 曾被360检出，0.1.2/0.1.3复核未通过且未提供具体判定依据。本版尚无360放行结论。功能测试及源码公开不构成恶意软件鉴定。若被拦截，保留隔离并向厂商核实。\n\n源码与问题反馈：https://github.com/apple-half/nga-reader\n'
 
 
 def create_archive(target, build_root, output):
@@ -132,12 +132,22 @@ def create_archive(target, build_root, output):
     return verify_archive(path, target)
 
 
-def checksums(output):
+def update_asset_names():
+    return [name for target in TARGETS for name in (f'nga-reader-{VERSION}-{target}.tar.gz', f'update-{target}.json')]
+
+
+def checksums(output, include_updates=False):
     output = Path(output)
     expected = {asset_name(t) for t in TARGETS}
     if {p.name for p in output.glob('*.zip')} != expected:
         raise ValueError('All three platform archives are required before publishing')
     results = [verify_archive(output / asset_name(t), t) for t in TARGETS]
+    if include_updates:
+        for name in update_asset_names():
+            path = output / name
+            if not path.is_file() or path.is_symlink():
+                raise ValueError('Signed update asset is missing: ' + name)
+            results.append({'file': name, 'bytes': path.stat().st_size, 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
     (output / 'SHA256SUMS.txt').write_text(''.join(r['sha256'] + '  ' + r['file'] + '\n' for r in sorted(results, key=lambda x: x['file'])), encoding='utf-8')
     return results
 

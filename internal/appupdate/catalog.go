@@ -114,15 +114,19 @@ func (c *Client) Latest(ctx context.Context, current, target string) (*Offer, er
 	if err := json.Unmarshal(raw, &releases); err != nil {
 		return nil, fmt.Errorf("GitHub版本列表格式异常")
 	}
+	eligible := releases[:0]
+	for _, release := range releases {
+		n, err := CompareVersions(release.TagName, current)
+		if !release.Draft && err == nil && n > 0 && strings.HasPrefix(release.TagName, "v") {
+			eligible = append(eligible, release)
+		}
+	}
+	releases = eligible
 	sort.SliceStable(releases, func(i, j int) bool {
 		n, err := CompareVersions(releases[i].TagName, releases[j].TagName)
 		return err == nil && n > 0
 	})
 	for _, release := range releases {
-		n, err := CompareVersions(release.TagName, current)
-		if release.Draft || err != nil || n <= 0 || !strings.HasPrefix(release.TagName, "v") {
-			continue
-		}
 		version := strings.TrimPrefix(release.TagName, "v")
 		wanted := map[string]Asset{}
 		duplicate := false

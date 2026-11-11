@@ -54,7 +54,7 @@ class PublishTests(unittest.TestCase):
         self.root = Path(self.directory.name)
         output = self.root / 'dist'
         output.mkdir()
-        names = [publish.asset_name(t) for t in publish.TARGETS] + ['SHA256SUMS.txt']
+        names = [publish.asset_name(t) for t in publish.TARGETS] + publish.update_asset_names() + ['SHA256SUMS.txt']
         self.assets = []
         for name in names:
             data = ('synthetic fixture ' + name).encode()
@@ -62,6 +62,7 @@ class PublishTests(unittest.TestCase):
             self.assets.append({'name': name, 'state': 'uploaded', 'size': len(data), 'digest': 'sha256:' + hashlib.sha256(data).hexdigest()})
         self.calls = []
         self.state = {'draft': True, 'prerelease': False}
+        self.verify_error = None
 
     def gh(self, *args):
         self.calls.append(args)
@@ -73,9 +74,9 @@ class PublishTests(unittest.TestCase):
     def release(self, *args, **kwargs):
         return {**self.state, 'assets': self.assets, 'html_url': 'https://github.com/example/reader/releases/tag/v' + publish.VERSION}
 
-    def run_publish(self):
-        with patch.dict(os.environ, {'GITHUB_REPOSITORY': 'example/reader', 'RELEASE_TAG': 'v' + publish.VERSION}), patch.object(publish, 'ROOT', self.root), patch.object(publish, 'check_version'), patch.object(publish, 'checksums'), patch.object(publish, 'release', side_effect=self.release), patch.object(publish, 'gh', side_effect=self.gh):
-            publish.main()
+    def run_publish(self, stage_only=False):
+        with patch.dict(os.environ, {'GITHUB_REPOSITORY': 'example/reader', 'RELEASE_TAG': 'v' + publish.VERSION}), patch.object(publish, 'ROOT', self.root), patch.object(publish, 'check_version'), patch.object(publish, 'checksums'), patch.object(publish, 'verify_updates', side_effect=self.verify_error), patch.object(publish, 'release', side_effect=self.release), patch.object(publish, 'gh', side_effect=self.gh):
+            publish.main(stage_only=stage_only)
 
     def test_reused_stable_draft_is_made_prerelease_before_exposure(self):
         self.run_publish()
@@ -96,6 +97,24 @@ class PublishTests(unittest.TestCase):
         self.state['draft'] = False
         with self.assertRaisesRegex(RuntimeError, 'already published'):
             self.run_publish()
+        self.assertEqual(self.calls, [])
+
+    def test_stage_uploads_only_portable_assets_and_stays_draft(self):
+        self.assets = [a for a in self.assets if a['name'] not in publish.update_asset_names()]
+        self.run_publish(stage_only=True)
+        self.assertTrue(self.state['draft'])
+        self.assertFalse(any(c[:2] == ('release', 'edit') for c in self.calls))
+
+    def test_finalization_requires_offline_signatures_before_upload(self):
+        self.verify_error = RuntimeError('invalid update signature')
+        with self.assertRaisesRegex(RuntimeError, 'signature'):
+            self.run_publish()
+        self.assertTrue(self.state['draft'])
+        self.assertEqual(self.calls, [])
+
+    def test_signed_draft_cannot_be_rebuilt_over_existing_signatures(self):
+        with self.assertRaisesRegex(RuntimeError, 'already contains signed'):
+            self.run_publish(stage_only=True)
         self.assertEqual(self.calls, [])
 
 

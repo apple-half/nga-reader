@@ -1,11 +1,12 @@
 """Publish only a complete verified asset set, using GitHub Actions' scoped token."""
 from pathlib import Path
+import argparse
 import hashlib
 import json
 import os
 import subprocess
 
-from package import ROOT, VERSION, TARGETS, asset_name, check_version, checksums
+from package import ROOT, VERSION, TARGETS, asset_name, check_version, checksums, update_asset_names
 
 
 def gh(*args):
@@ -29,16 +30,25 @@ def release(repo, tag, missing_ok=False):
     raise RuntimeError('Release not found: ' + tag)
 
 
-def main():
+def verify_updates(directory):
+    subprocess.run(['go', 'run', './cmd/update-release', 'verify', '--dir', str(directory), '--version', VERSION, '--key', str(ROOT / 'resources' / 'update-public.txt')], cwd=ROOT, check=True, capture_output=True, text=True)
+
+
+def main(stage_only=False):
     repo = os.environ['GITHUB_REPOSITORY']
     tag = os.environ['RELEASE_TAG']
     check_version(tag)
     directory = ROOT / 'dist'
-    checksums(directory)
-    paths = [directory / asset_name(target) for target in TARGETS] + [directory / 'SHA256SUMS.txt']
+    if not stage_only:
+        verify_updates(directory)
+    checksums(directory, include_updates=not stage_only)
+    names = [asset_name(target) for target in TARGETS] + ([] if stage_only else update_asset_names()) + ['SHA256SUMS.txt']
+    paths = [directory / name for name in names]
     current = release(repo, tag, missing_ok=True)
     if current and not current['draft']:
         raise RuntimeError('Refusing to change an already published release')
+    if stage_only and current and any(asset['name'] in update_asset_names() for asset in current['assets']):
+        raise RuntimeError('Draft already contains signed update assets; refusing to rebuild over them')
     if current is None:
         gh('release', 'create', tag, '--repo', repo, '--verify-tag', '--draft', '--prerelease', '--title', f'NGA Reader {VERSION} · 免安装便携版', '--notes-file', str(ROOT / 'packaging' / 'release-notes.md'))
     gh('release', 'upload', tag, '--repo', repo, '--clobber', *(str(path) for path in paths))
@@ -51,6 +61,9 @@ def main():
         expected = 'sha256:' + hashlib.sha256(path.read_bytes()).hexdigest()
         if asset['state'] != 'uploaded' or asset['size'] != path.stat().st_size or asset.get('digest') != expected:
             raise RuntimeError('Uploaded asset size/digest differs: ' + path.name)
+    if stage_only:
+        print('Draft ready for offline update signing: ' + uploaded['html_url'])
+        return
     # Keep the release as a draft until every platform and checksum file agrees.
     gh('release', 'edit', tag, '--repo', repo, '--prerelease', '--draft=false')
     final = release(repo, tag)
@@ -60,4 +73,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--stage-only', action='store_true', help='Upload only the three portable ZIPs; keep the release unpublished for offline signing')
+    main(stage_only=parser.parse_args().stage_only)

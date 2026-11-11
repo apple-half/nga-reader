@@ -77,6 +77,26 @@ func readZIPEntries(reader *zip.ReadCloser, target string) ([]zipEntry, error) {
 		if !file.Mode().IsRegular() {
 			return nil, fmt.Errorf("更新包包含链接或特殊文件")
 		}
+		if target == "windows-amd64" && file.Name == "NGAReader/.mygo-files" {
+			if seen[".mygo-files"] {
+				return nil, fmt.Errorf("更新包路径重复")
+			}
+			seen[".mygo-files"] = true
+			r, err := file.Open()
+			if err != nil {
+				return nil, err
+			}
+			raw, err := io.ReadAll(io.LimitReader(r, maxManagedListBytes+1))
+			r.Close()
+			if err != nil {
+				return nil, err
+			}
+			if err := validateManagedList(raw); err != nil {
+				return nil, err
+			}
+			// MyGo writes the new managed list after installation.
+			continue
+		}
 		name, skip, err := archiveName(file.Name, target)
 		if err != nil {
 			return nil, err

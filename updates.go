@@ -48,6 +48,15 @@ func (o *nativeUpdateOffer) Install(ctx context.Context, progress func(int64, in
 	if o.update == nil {
 		return fmt.Errorf("当前程序位置不支持自动安装，请下载便携版更新")
 	}
+	if runtime.GOOS == "windows" {
+		executable, err := os.Executable()
+		if err != nil {
+			return err
+		}
+		if err := appupdate.ValidateWindowsManagedFiles(filepath.Dir(executable)); err != nil {
+			return err
+		}
+	}
 	return o.update.Install(ctx, progress)
 }
 func newUpdateEngine() (updateEngine, error) {

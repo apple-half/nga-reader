@@ -1,8 +1,10 @@
 package appupdate
 
 import (
+	"archive/tar"
 	"archive/zip"
 	"bytes"
+	"compress/gzip"
 	"context"
 	"crypto/ed25519"
 	"crypto/rand"
@@ -208,5 +210,98 @@ func TestUpdateArchiveRejectsTraversalPrivateFilesAndWrongBinary(t *testing.T) {
 		if err := ArchiveFromZIP(z, filepath.Join(dir, "update.tar.gz"), "windows-amd64"); err == nil {
 			t.Fatalf("bad archive accepted: %v", extra)
 		}
+	}
+}
+
+func TestUpdateArchiveAcceptsSdkManagedListWithoutShippingIt(t *testing.T) {
+	dir := t.TempDir()
+	z := filepath.Join(dir, "input.zip")
+	makeUpdateZIP(t, z, "windows-amd64", map[string]string{"NGAReader/.mygo-files": "LICENSE\nLICENSES\nNGAReader.exe\n"})
+	if err := ArchiveFromZIP(z, filepath.Join(dir, "update.tar.gz"), "windows-amd64"); err != nil {
+		t.Fatal("official SDK file list rejected:", err)
+	}
+	f, err := os.Open(filepath.Join(dir, "update.tar.gz"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	gz, err := gzip.NewReader(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer gz.Close()
+	tr := tar.NewReader(gz)
+	for {
+		h, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+		if h.Name == ".mygo-files" {
+			t.Fatal("SDK must regenerate the managed list")
+		}
+	}
+}
+
+func TestUpdateManagedListCannotRemovePrivateFiles(t *testing.T) {
+	dir := t.TempDir()
+	if err := ValidateWindowsManagedFiles(dir); err != nil {
+		t.Fatal(err)
+	}
+	for _, content := range []string{"NGAReader.exe\nLICENSE\nLICENSES\n", "data\n", "drafts.json\n", "..\n", "LICENSES/../../data\n", strings.Repeat("x", 4097)} {
+		if err := os.WriteFile(filepath.Join(dir, ".mygo-files"), []byte(content), 0600); err != nil {
+			t.Fatal(err)
+		}
+		err := ValidateWindowsManagedFiles(dir)
+		if strings.HasPrefix(content, "NGAReader.exe") {
+			if err != nil {
+				t.Fatal(err)
+			}
+			continue
+		}
+		if err == nil {
+			t.Fatalf("unsafe existing managed list accepted: %.60q", content)
+		}
+		z := filepath.Join(t.TempDir(), "input.zip")
+		makeUpdateZIP(t, z, "windows-amd64", map[string]string{"NGAReader/.mygo-files": content})
+		if err := ArchiveFromZIP(z, z+".tar.gz", "windows-amd64"); err == nil {
+			t.Fatal("unsafe ZIP managed list accepted")
+		}
+	}
+}
+
+func TestUpdateCatalogSortsVersionsAcrossInvalidTags(t *testing.T) {
+	pub, priv := testKeys(t)
+	var releases []Release
+	bodies := map[string][]byte{}
+	for _, version := range []string{"0.1.8", "invalid", "0.1.9"} {
+		if version == "invalid" {
+			releases = append(releases, Release{TagName: version})
+			continue
+		}
+		m := testManifest(t, priv, "windows-amd64")
+		m.Version = version
+		m.URL = AssetURL(version, TarName(version, m.Target))
+		if err := SignManifest(&m, priv); err != nil {
+			t.Fatal(err)
+		}
+		raw, _ := json.Marshal(m)
+		sum := sha256.Sum256(raw)
+		url := AssetURL(version, ManifestName(m.Target))
+		bodies[url] = raw
+		releases = append(releases, Release{TagName: "v" + version, Assets: []Asset{{Name: ManifestName(m.Target), URL: url, Size: int64(len(raw)), Digest: "sha256:" + hex.EncodeToString(sum[:])}, {Name: TarName(version, m.Target), URL: m.URL, Size: m.Size, Digest: "sha256:" + m.SHA256}}})
+	}
+	c := NewClient(&http.Client{Transport: testTransport(func(r *http.Request) (*http.Response, error) {
+		raw := bodies[r.URL.String()]
+		if r.URL.Host == "api.github.com" {
+			raw, _ = json.Marshal(releases)
+		}
+		return &http.Response{StatusCode: 200, Header: make(http.Header), Body: ioCloser(raw)}, nil
+	})}, pub)
+	offer, err := c.Latest(context.Background(), "0.1.7", "windows-amd64")
+	if err != nil || offer == nil || offer.Manifest.Version != "0.1.9" {
+		t.Fatalf("newest version missed: %+v %v", offer, err)
 	}
 }

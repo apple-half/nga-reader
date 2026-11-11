@@ -8,13 +8,13 @@
 
 ## 下载免安装版
 
-[v0.1.6 便携预发布](https://github.com/apple-half/nga-reader/releases/tag/v0.1.6)：
+[v0.1.7 便携预发布](https://github.com/apple-half/nga-reader/releases/tag/v0.1.7)：
 
 | 系统 | 下载 | 使用方法 |
 | --- | --- | --- |
-| Windows x64 | [Windows 便携 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.6/NGAReader-0.1.6-Windows-x64-portable.zip) | 解压整个文件夹，双击 `NGAReader.exe` |
-| Mac Apple 芯片（M 系列） | [Apple 芯片 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.6/NGAReader-0.1.6-macOS-AppleSilicon-portable.zip) | 解压后打开 `NGAReader.app` |
-| Mac Intel | [Intel ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.6/NGAReader-0.1.6-macOS-Intel-portable.zip) | 解压后打开 `NGAReader.app` |
+| Windows x64 | [Windows 便携 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.7/NGAReader-0.1.7-Windows-x64-portable.zip) | 解压整个文件夹，双击 `NGAReader.exe` |
+| Mac Apple 芯片（M 系列） | [Apple 芯片 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.7/NGAReader-0.1.7-macOS-AppleSilicon-portable.zip) | 解压后打开 `NGAReader.app` |
+| Mac Intel | [Intel ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.7/NGAReader-0.1.7-macOS-Intel-portable.zip) | 解压后打开 `NGAReader.app` |
 
 无需安装向导或管理员权限。Mac 最低 macOS 12，不强制复制到 Applications。可用 Release 的 `SHA256SUMS.txt` 核对下载内容。程序没有商业代码签名或 Apple 公证，且尚无本版的 360 放行结论，详见下方安全说明。
 
@@ -37,6 +37,15 @@
 - 官方登录成功后返回阅读器；可选择在本机加密保存会话。
 - 个别帖子 JSON 数据不完整时，自动追加一次同站静态正文请求，继续原生阅读；不执行正文网页脚本。
 - 侧栏内置离线使用说明；支持 F5 刷新、Ctrl + Shift + Space 隐藏或恢复窗口。
+- 启动后自动检查 GitHub 签名更新；有新版时提示，点击后才下载和安装，完成后手动重启。
+
+## 软件更新
+
+首次需要手动下载并运行 0.1.7 或更高版本，旧版尚无自动更新入口。正式便携版启动10秒后检查更新，此后每24小时检查；可在侧栏“软件更新”关闭自动检查，或随时手动检查。检查失败可继续阅读。
+
+发现新版后先查看版本说明，点击“下载并安装”，完成后点击“重启使用新版”。更新只替换程序文件，保留设置、收藏、历史、草稿与待确认发送记录；正在发帖或回复时禁止安装。勾选“记住本机登录”的会话会保存；仅本次运行有效的登录在重启后需要重新登录。
+
+Windows 请保留文件名 `NGAReader.exe`，并放在可写文件夹。Mac 应先从 ZIP 解压后运行；只读或被系统隔离的位置可能无法自动安装，此时按提示手动下载便携包。程序会验证内置公钥对应的 Ed25519 更新签名，该签名用于验证更新来源，不等同于 Windows 代码签名或 Apple 公证。
 
 ## 发帖与回复
 
@@ -92,6 +101,8 @@ python packaging/package.py --target windows-amd64
 
 该命令使用 go.mod 固定的 MyGo CLI 版本；Python 只用标准库。正式 Release 工作流在 Windows 和两种芯片的 Mac 环境分别测试、构建和校验，Mac 使用系统 codesign 做 ad-hoc 签名。跨系统编译可生成 App Bundle，但 Mac 签名需在 macOS 上完成。真实账号登录、系统凭据、WebView 验证与完整 GUI 使用仍需真机验证；Linux 不在本次便携 Release 范围。
 
+更新包采用离线签名，私钥不进入仓库或 GitHub Actions。维护者发布步骤见 [发布与签名](packaging/UPDATES.md)；自行构建的分支应使用自己的仓库和密钥。
+
 ## 开始阅读
 
 1. 点击「登录 NGA」，在官方页面完成登录。Windows 官方登录和 App 内图片预览需要已有 WebView2 Runtime。
@@ -107,7 +118,7 @@ python packaging/package.py --target windows-amd64
 
 官方网页、图床验证及系统代理配置可能引发相应网络请求。本项目遵守论坛登录、权限和频率限制，不提供绕过验证、发帖、投票或批量操作功能。
 
-**杀毒状态：** Windows 0.1.2 构建曾被 360 检出为 `Trojan.Win64.SilverFox.ZAX`。包含 0.1.2 / 0.1.3 样本的复核申请未通过；收到的回复未给出具体检出依据。当前版本为 0.1.6，尚无该版本的 360 放行结论。Windows 程序没有 Authenticode 签名，Mac 只有 ad-hoc 完整性签名，没有 Developer ID 签名或 Apple 公证，系统可能阻止启动。公开源码、功能测试、校验值及依赖漏洞扫描不能替代恶意软件鉴定。详情见 [安全说明](SECURITY.md)。
+**杀毒状态：** Windows 0.1.2 构建曾被 360 检出为 `Trojan.Win64.SilverFox.ZAX`。包含 0.1.2 / 0.1.3 样本的复核申请未通过；收到的回复未给出具体检出依据。当前版本为 0.1.7，尚无该版本的 360 放行结论。Windows 程序没有 Authenticode 签名，Mac 只有 ad-hoc 完整性签名，没有 Developer ID 签名或 Apple 公证，系统可能阻止启动。公开源码、功能测试、校验值及依赖漏洞扫描不能替代恶意软件鉴定。详情见 [安全说明](SECURITY.md)。
 
 ## 开发与验证
 
@@ -127,6 +138,7 @@ Node.js 仅用于可选的登录页脚本测试，构建和运行软件不依赖
 *.go              原生界面、登录和阅读操作
 internal/nga/     论坛请求、解析、BBCode 与附件地址处理
 internal/local/   本地设置、加密会话与请求取消
+internal/appupdate/ GitHub 版本选择、更新签名与安全归档
 resources/        内置说明、登录页辅助脚本与第三方许可
 LICENSES/         第三方组件的许可原文
 docs/images/      离线演示界面图

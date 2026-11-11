@@ -6,8 +6,13 @@ on:
       tag:
         description: 'Existing version tag to build'
         required: true
-        default: 'v0.1.6'
+        default: 'v0.1.7'
         type: string
+      publish_existing:
+        description: 'Verify and publish the draft after offline signed update files have been uploaded'
+        required: false
+        default: false
+        type: boolean
   push:
     tags:
       - 'v*'
@@ -21,6 +26,7 @@ concurrency:
 
 jobs:
   build:
+    if: ${{ !inputs.publish_existing }}
     name: Build ${{ matrix.target }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 25
@@ -99,8 +105,9 @@ jobs:
           retention-days: 7
 
   publish:
-    name: Publish verified portable release
+    name: Stage or publish verified portable release
     needs: build
+    if: ${{ !cancelled() && (inputs.publish_existing || needs.build.result == 'success') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -118,12 +125,23 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.12'
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
       - name: Test release publisher
         run: python -m unittest discover -s packaging -p 'test_*.py'
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        if: ${{ !inputs.publish_existing }}
         with:
           pattern: portable-*
           path: dist
           merge-multiple: true
-      - name: Verify all archives and publish
-        run: python packaging/publish.py
+      - name: Stage native ZIPs for offline signing
+        if: ${{ !inputs.publish_existing }}
+        run: python packaging/publish.py --stage-only
+      - name: Download and verify signed draft before publication
+        if: ${{ inputs.publish_existing }}
+        run: |
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir dist
+          python packaging/publish.py
