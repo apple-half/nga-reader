@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/egoist/mygo"
@@ -54,6 +55,12 @@ type reader struct {
 	compose                                       composerState
 	posting                                       postingAPI
 	runPosting                                    func(func())
+	updates                                       updateState
+	updaterEngine                                 updateEngine
+	runUpdateTask                                 func(func())
+	relaunchUpdate                                func()
+	updateGate                                    local.RequestGate
+	releaseOwner                                  func()
 	postAfterLogin                                *postIntent
 	drafts                                        []local.Draft
 	draftsError                                   error
@@ -95,7 +102,10 @@ func openOwnedReader(dir string) (*reader, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	return newReader(dir), func() { _ = owner.Close() }, nil
+	a := newReader(dir)
+	release := sync.OnceFunc(func() { _ = owner.Close() })
+	a.releaseOwner = release
+	return a, release, nil
 }
 
 func (a *reader) update(fn func()) {
@@ -205,6 +215,7 @@ func (a *reader) shutdown() {
 	a.closing = true
 	a.saveComposer()
 	a.cancel()
+	a.updateGate.Close()
 	a.composeGate.Close()
 	a.topicGate.Close()
 	a.threadGate.Close()
@@ -222,5 +233,11 @@ func (a *reader) shutdown() {
 	if a.tray != nil {
 		a.tray.Destroy()
 	}
-	mygo.GlobalShortcut.Unregister("Ctrl+Shift+Space")
+	if a.win != nil {
+		mygo.GlobalShortcut.Unregister("Ctrl+Shift+Space")
+	}
+	if a.releaseOwner != nil {
+		a.releaseOwner()
+		a.releaseOwner = nil
+	}
 }

@@ -23,21 +23,23 @@ type Reading struct {
 	At    time.Time `json:"at"`
 }
 type State struct {
-	Boards        []Board     `json:"boards"`
-	Favorites     []nga.Topic `json:"favorites"`
-	History       []Reading   `json:"history"`
-	Theme         string      `json:"theme"`
-	FontSize      int         `json:"fontSize"`
-	TextOnly      bool        `json:"textOnly"`
-	RememberLogin bool        `json:"rememberLogin"`
-	LastBoard     int64       `json:"lastBoard"`
-	LastTopic     int64       `json:"lastTopic"`
-	SidebarWidth  float32     `json:"sidebarWidth"`
-	TopicWidth    float32     `json:"topicWidth"`
+	Boards           []Board     `json:"boards"`
+	Favorites        []nga.Topic `json:"favorites"`
+	History          []Reading   `json:"history"`
+	Theme            string      `json:"theme"`
+	FontSize         int         `json:"fontSize"`
+	TextOnly         bool        `json:"textOnly"`
+	RememberLogin    bool        `json:"rememberLogin"`
+	AutoCheckUpdates bool        `json:"autoCheckUpdates"`
+	LastUpdateCheck  time.Time   `json:"lastUpdateCheck,omitempty"`
+	LastBoard        int64       `json:"lastBoard"`
+	LastTopic        int64       `json:"lastTopic"`
+	SidebarWidth     float32     `json:"sidebarWidth"`
+	TopicWidth       float32     `json:"topicWidth"`
 }
 
 func Defaults() State {
-	return State{Boards: []Board{{ID: -7, Name: "大漩涡"}}, Theme: "深色", FontSize: 15, TextOnly: true, LastBoard: -7, SidebarWidth: 180, TopicWidth: 310}
+	return State{Boards: []Board{{ID: -7, Name: "大漩涡"}}, Theme: "深色", FontSize: 15, TextOnly: true, LastBoard: -7, SidebarWidth: 180, TopicWidth: 310, AutoCheckUpdates: true}
 }
 
 func Load(dir string) (State, error) {

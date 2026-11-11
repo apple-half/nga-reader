@@ -48,6 +48,10 @@ func (a *reader) postTask(fn func()) {
 }
 
 func (a *reader) openComposer(target nga.PostTarget, label string) {
+	if a.updates.Installing {
+		a.notify("正在安装更新，请等待完成后再发帖")
+		return
+	}
 	if target.Validate() != nil {
 		a.notify("无法确定发帖目标，请先打开板块或帖子")
 		return
@@ -216,6 +220,10 @@ func (a *reader) closeComposer() bool {
 }
 
 func (a *reader) allowSessionChange() bool {
+	if a.updates.Installing {
+		a.notify("正在安装更新，请等待完成后再切换账号")
+		return false
+	}
 	if a.compose.Sending {
 		a.notify("正在发送，请等待论坛返回结果后再切换账号")
 		return false
@@ -299,6 +307,9 @@ func (a *reader) confirmComposerPublished() {
 }
 
 func (a *reader) sendComposer() {
+	if a.updates.Installing {
+		return
+	}
 	if a.demo || !a.compose.Open || a.compose.Sending || a.compose.Preparing || !a.compose.Ready {
 		return
 	}

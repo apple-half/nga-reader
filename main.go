@@ -125,7 +125,18 @@ func main() {
 	mygo.App.WhenReady(func() {
 		a.win = mygo.NewWindow(mygo.WindowOptions{Title: "工作台", Width: 1280, Height: 820, MinWidth: 980, MinHeight: 620, TitleBarStyle: mygo.TitleBarHidden, TitleBarHeight: 44, BackgroundColor: "#202020", Content: ui.View(a.view)})
 		_ = a.win.SetIcon(windowIcon())
-		a.win.OnClose(func(*mygo.CloseEvent) { a.shutdown() })
+		a.win.OnClose(func(event *mygo.CloseEvent) {
+			if !a.canCloseForUpdate() {
+				event.PreventDefault()
+				return
+			}
+			a.shutdown()
+		})
+		a.updaterEngine, err = newUpdateEngine()
+		if err != nil {
+			a.notify("自动更新配置无效，仍可手动下载新版")
+		}
+		a.startUpdateChecks()
 		if err := mygo.GlobalShortcut.Register("Ctrl+Shift+Space", a.toggleHidden); err != nil {
 			a.notify("隐藏快捷键已被占用，可点击底栏隐藏，通过托盘恢复")
 		}
@@ -135,6 +146,11 @@ func main() {
 		}
 		if !a.demo {
 			a.loadTopics(1)
+		}
+	})
+	mygo.App.OnBeforeQuit(func(event *mygo.QuitEvent) {
+		if !a.canCloseForUpdate() {
+			event.PreventDefault()
 		}
 	})
 	mygo.App.OnQuit(a.shutdown)

@@ -22,6 +22,10 @@ func dialog(c *ui.Context, open *bool, title string, body func()) {
 }
 func (a *reader) dialogs(c *ui.Context, p palette) {
 	dialog(c, &a.settingsOpen, "阅读设置", func() {
+		ui.Row(c).Gap(10).Children(func() {
+			ui.Textf(c, "NGA Reader %s", appVersion).FontSize(12).Grow(1)
+			ui.Button(c, "检查更新").OnClick(func() { a.checkUpdates(true) })
+		})
 		ui.Row(c).Gap(18).Children(func() {
 			ui.Text(c, "界面主题").Grow(1)
 			ui.Select(c, &a.state.Theme, []string{"深色", "浅色", "NGA经典屎黄色", "跟随系统"}).Width(185).Label("界面主题").OnChange(func() { a.applyAppearance(); a.save() })

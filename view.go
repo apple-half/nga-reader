@@ -118,6 +118,7 @@ func (a *reader) view(c *ui.Context) {
 	a.dialogs(c, p)
 	a.helpDialog(c)
 	a.composerView(c)
+	a.updatesView(c)
 }
 
 func (a *reader) titlebar(c *ui.Context, p palette) {
@@ -142,6 +143,11 @@ func (a *reader) sidebar(c *ui.Context, p palette) {
 		navButton(c, "nav-board", "topics", "全部话题", "", a.mode == "board", p, func() { a.mode = "board"; a.filter = "" })
 		navButton(c, "nav-fav", "bookmark", "我的收藏", fmt.Sprint(len(a.state.Favorites)), a.mode == "favorites", p, func() { a.mode = "favorites"; a.filter = "" })
 		navButton(c, "nav-history", "clock", "最近阅读", "", a.mode == "history", p, func() { a.mode = "history"; a.filter = "" })
+		updateCount := ""
+		if a.updates.Offer != nil {
+			updateCount = "●"
+		}
+		navButton(c, "nav-updates", "refresh", "软件更新", updateCount, false, p, func() { a.checkUpdates(true) })
 		ui.Row(c).Padding(19, 10, 3, 10).Children(func() {
 			ui.Text(c, "我的板块").FontSize(11).TextColor(c.Theme().TextMuted).Grow(1)
 			iconButton(c, "add-board", "plus", "添加板块", false).OnClick(func() { a.formError = ""; a.addOpen = true })
