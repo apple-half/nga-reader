@@ -49,7 +49,10 @@ func (a *reader) composerView(c *ui.Context) {
 							}
 						}
 					})
-					ui.TextInput(c.Key("compose-title"), &s.Draft.Subject).Label("帖子标题").Placeholder("给这篇帖子起个标题…").MaxLength(nga.MaxPostSubjectRunes).Disabled(locked).FillWidth().OnChange(func() { a.saveComposer() })
+					// MyGo MaxLength counts UTF-16 units. The doubled transport
+					// bound preserves every legal rune sequence; validation below
+					// enforces the visible character limit without cutting emoji.
+					ui.TextInput(c.Key("compose-title"), &s.Draft.Subject).Label("帖子标题").Placeholder("给这篇帖子起个标题…").MaxLength(2 * nga.MaxPostSubjectRunes).Disabled(locked).FillWidth().OnChange(func() { a.saveComposer() })
 					categories := []string{"不加分类"}
 					for _, item := range s.Categories {
 						categories = append(categories, item)
@@ -76,7 +79,7 @@ func (a *reader) composerView(c *ui.Context) {
 					ui.Text(c, s.Draft.Label).FontSize(13).FontWeight(500).LineHeight(1.5)
 					ui.Text(c, s.BoardChoice).FontSize(11).TextColor(c.Theme().TextMuted)
 				}
-				ui.TextArea(c.Key("compose-body"), &s.Draft.Content).Label("正文").Placeholder("写下你想说的话…\n支持文字和 NGA BBCode，不上传图片。").Height(210).FillWidth().MaxLength(nga.MaxPostContentRunes).Disabled(locked).OnChange(func() { a.saveComposer() })
+				ui.TextArea(c.Key("compose-body"), &s.Draft.Content).Label("正文").Placeholder("写下你想说的话…\n支持文字和 NGA BBCode，不上传图片。").Height(210).FillWidth().MaxLength(2 * nga.MaxPostContentRunes).Disabled(locked).OnChange(func() { a.saveComposer() })
 				ui.Row(c).Gap(8).Children(func() {
 					hint := "Enter 换行 · 草稿自动保存到本机"
 					if a.demo {
@@ -96,6 +99,9 @@ func (a *reader) composerView(c *ui.Context) {
 				}
 				if s.SaveError != "" {
 					ui.Text(c, s.SaveError).FontSize(12).TextColor(c.Theme().Danger).Selectable()
+				}
+				if utf8.RuneCountInString(s.Draft.PostSubject()) > nga.MaxPostSubjectRunes || utf8.RuneCountInString(s.Draft.Content) > nga.MaxPostContentRunes {
+					ui.Text(c, "标题（含分类）最多128字，正文最多20000字，请删减后发送。").FontSize(12).TextColor(c.Theme().Danger)
 				}
 				if s.Draft.Uncertain && !s.Sending {
 					ui.Checkbox(c, &s.RetryAcknowledged, "我已检查原帖或板块，确认没有发表").FontSize(12)
@@ -120,7 +126,8 @@ func (a *reader) composerView(c *ui.Context) {
 			if s.Sending {
 				sendLabel = "正在发送…"
 			}
-			ui.PrimaryButton(c, sendLabel).Disabled(a.demo || locked || !s.Ready).OnClick(a.sendComposer)
+			valid := nga.ValidatePostText(s.Draft.Target, s.Draft.PostSubject(), s.Draft.Content) == nil
+			ui.PrimaryButton(c, sendLabel).Disabled(a.demo || locked || !s.Ready || !valid).OnClick(a.sendComposer)
 		})
 	})
 	if panel.Dismissed() {

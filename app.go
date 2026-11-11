@@ -88,6 +88,16 @@ func newReader(dir string) *reader {
 	return a
 }
 
+// Production entry must acquire ownership before taking a settings/drafts
+// snapshot. Keeping a whole-directory owner also protects pending transitions.
+func openOwnedReader(dir string) (*reader, func(), error) {
+	owner, err := local.LockDataDirectory(dir)
+	if err != nil {
+		return nil, nil, err
+	}
+	return newReader(dir), func() { _ = owner.Close() }, nil
+}
+
 func (a *reader) update(fn func()) {
 	if a.ctx.Err() != nil {
 		return

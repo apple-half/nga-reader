@@ -270,3 +270,55 @@ func TestComposerReadActionsBindTopicAndMainFloor(t *testing.T) {
 	}
 	writePreview(t, tt, "compose-quote")
 }
+
+func TestComposerEditorPreservesValidSupplementaryCharacters(t *testing.T) {
+	a, _ := postingReader(t)
+	a.useDemo()
+	a.openComposer(nga.PostTarget{Action: "new", FID: -7}, "大漩涡")
+	tt := ui.NewTester(a.view, 1280, 820)
+	title := strings.Repeat("😀", 65)
+	if err := tt.Click("帖子标题"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Type(title)
+	if a.compose.Draft.Subject != title {
+		t.Fatalf("valid emoji title was cut to %d runes", len([]rune(a.compose.Draft.Subject)))
+	}
+	body := strings.Repeat("😀", 10001)
+	if err := tt.Click("正文"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Type(body)
+	if a.compose.Draft.Content != body {
+		t.Fatalf("valid emoji body was cut to %d runes", len([]rune(a.compose.Draft.Content)))
+	}
+}
+
+func TestReaderSecondOwnerCannotLoadOrOverwritePendingDrafts(t *testing.T) {
+	dir := t.TempDir()
+	a, closeOwner, err := openOwnedReader(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer a.cancel()
+	defer closeOwner()
+	draft := local.Draft{UID: 123, Target: nga.PostTarget{Action: "reply", TID: 9, FID: -7}, Content: "待确认内容", Uncertain: true}
+	if err := local.SaveDrafts(dir, []local.Draft{draft}); err != nil {
+		t.Fatal(err)
+	}
+	if second, release, err := openOwnedReader(dir); err == nil {
+		second.cancel()
+		release()
+		t.Fatal("second startup loaded a writable stale snapshot")
+	}
+	closeOwner()
+	b, closeSecond, err := openOwnedReader(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer b.cancel()
+	defer closeSecond()
+	if len(b.drafts) != 1 || !b.drafts[0].Uncertain {
+		t.Fatal("pending protection disappeared across owners")
+	}
+}

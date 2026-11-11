@@ -51,6 +51,6 @@
 
 **Files:** main.go, mygo.json, README.md, SECURITY.md, resources/usage.md, packaging/release-notes.md, workflow dispatch version default.
 - [x] Run full Go tests/vet, Node login tests, Python publisher tests, actionlint and private-data scan.
-- [ ] Complete one independent code review and fix blocking findings with regression tests.
+- [x] Complete one independent code review and fix blocking findings with regression tests. Added exclusive data-directory ownership before snapshot load and consistent supplementary-character limits; both regressions observed RED then GREEN.
 - [ ] Bump to0.1.6, build/verify Windows and both Mac architectures with existing CI; create new immutable tag and complete public release.
 - [ ] Download all three ZIPs, verify CRC/architectures/licenses/signature envelopes/SHA256SUMS; report links and real-account verification boundary.

@@ -55,7 +55,31 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		return
 	}
-	a := newReader(dir)
+	mygo.App.SetName("NGAReader")
+	var a *reader
+	if *check {
+		a = newReader(dir)
+	} else {
+		if !mygo.App.RequestSingleInstanceLock() {
+			return
+		}
+		var releaseOwner func()
+		a, releaseOwner, err = openOwnedReader(dir)
+		if err != nil {
+			mygo.App.WhenReady(func() { mygo.Dialog.Error("无法打开 NGA Reader", err.Error()); mygo.App.Quit() })
+			if runErr := mygo.App.Run(); runErr != nil {
+				fmt.Fprintln(os.Stderr, runErr)
+			}
+			return
+		}
+		defer releaseOwner()
+		mygo.App.OnSecondInstance(func([]string, string) {
+			if a.win != nil && !a.win.IsDestroyed() {
+				a.win.Show()
+				a.win.Focus()
+			}
+		})
+	}
 	if *check {
 		ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
 		defer cancel()
@@ -75,7 +99,6 @@ func main() {
 		a.cancel()
 		return
 	}
-	mygo.App.SetName("NGAReader")
 	mygo.App.SetVersion(appVersion)
 	mygo.App.SetMenu(nil)
 	mygo.App.SetPath(mygo.PathUserData, filepath.Join(dir, "runtime"))

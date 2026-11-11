@@ -174,6 +174,10 @@ func (a *reader) saveComposer() bool {
 		a.compose.SaveError = a.draftsError.Error()
 		return false
 	}
+	if utf8.RuneCountInString(a.compose.Draft.Subject) > nga.MaxPostSubjectRunes || utf8.RuneCountInString(a.compose.Draft.Content) > nga.MaxPostContentRunes {
+		a.compose.SaveError = "草稿超过字数上限，请删减后保存；当前内容仍保留在编辑器中。"
+		return false
+	}
 	a.compose.Draft.UpdatedAt = time.Now()
 	next := append([]local.Draft(nil), a.drafts...)
 	found := false
