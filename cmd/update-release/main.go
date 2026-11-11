@@ -1,0 +1,57 @@
+// update-release signs verified native CI ZIPs locally, or verifies a draft
+// using only the public key. It never uploads or prints private key material.
+package main
+
+import (
+	"flag"
+	"fmt"
+	"os"
+	"strings"
+	"time"
+
+	"ngareader/internal/appupdate"
+)
+
+func main() {
+	if len(os.Args) < 2 {
+		fail(fmt.Errorf("usage: update-release sign|verify --dir ... --version ... --key ..."))
+	}
+	mode := os.Args[1]
+	f := flag.NewFlagSet(mode, flag.ExitOnError)
+	dir := f.String("dir", "dist", "directory containing the three native portable ZIPs")
+	version := f.String("version", "", "release version without v")
+	keyPath := f.String("key", "", "private key file for sign; public key file for verify")
+	notesPath := f.String("notes", "packaging/release-notes.md", "release notes file")
+	date := f.String("date", time.Now().UTC().Format(time.RFC3339), "UTC release date")
+	f.Parse(os.Args[2:])
+	keyText, err := os.ReadFile(*keyPath)
+	if err != nil {
+		fail(fmt.Errorf("cannot read the required signing/verification key file"))
+	}
+	if mode == "sign" {
+		key, err := appupdate.PrivateKey(string(keyText))
+		if err != nil {
+			fail(err)
+		}
+		notes, err := os.ReadFile(*notesPath)
+		if err != nil {
+			fail(err)
+		}
+		err = appupdate.SignDirectory(*dir, strings.TrimPrefix(*version, "v"), string(notes), *date, key)
+		if err != nil {
+			fail(err)
+		}
+	} else if mode == "verify" {
+		pub, err := appupdate.PublicKey(string(keyText))
+		if err != nil {
+			fail(err)
+		}
+		if err := appupdate.VerifyDirectory(*dir, strings.TrimPrefix(*version, "v"), pub); err != nil {
+			fail(err)
+		}
+	} else {
+		fail(fmt.Errorf("unknown operation"))
+	}
+	fmt.Println("All three platform update archives and metadata verified")
+}
+func fail(err error) { fmt.Fprintln(os.Stderr, err); os.Exit(1) }
