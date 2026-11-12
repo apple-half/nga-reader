@@ -75,4 +75,3 @@
 - [x] Native previews 980/1280/wide across themes and continuation states; full Go/vet, Node, Python packaging, version/privacy/diff checks; Expected: PASS.
 - [x] Whole-branch fresh reviewer; one Critical/Important fix pass with RED→GREEN; ledger all decisions and deferred minors.
 - [x] Build/verify local 0.1.12 Windows portable preview; optional local Mac cross-compilation. Keep all remote branches/tags/assets/feeds untouched. Update local validation and AGENTS with unfinished release work; Expected: local package verified, no GitHub writes.
-
