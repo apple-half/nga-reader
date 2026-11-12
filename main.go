@@ -133,7 +133,6 @@ func main() {
 				}
 			}
 		})
-		_ = a.win.SetIcon(windowIcon())
 		a.win.OnClose(func(event *mygo.CloseEvent) {
 			if !a.canCloseForUpdate() {
 				event.PreventDefault()
@@ -149,10 +148,11 @@ func main() {
 		if err := mygo.GlobalShortcut.Register("Ctrl+Shift+Space", a.toggleHidden); err != nil {
 			a.notify("隐藏快捷键已被占用，可点击底栏隐藏，通过托盘恢复")
 		}
-		tray, err := mygo.NewTray(mygo.TrayOptions{Icon: windowIcon(), ToolTip: "工作台", Menu: mygo.NewMenu([]*mygo.MenuItem{{Label: "显示工作台", Click: func(*mygo.MenuItem, *mygo.Window) { a.win.Show(); a.win.Focus() }}, {Label: "退出", Click: func(*mygo.MenuItem, *mygo.Window) { a.shutdown(); mygo.App.Quit() }}})})
+		tray, err := mygo.NewTray(mygo.TrayOptions{Icon: appIconPNGFor(a.state.AppIcon), ToolTip: "工作台", Menu: mygo.NewMenu([]*mygo.MenuItem{{Label: "显示工作台", Click: func(*mygo.MenuItem, *mygo.Window) { a.win.Show(); a.win.Focus() }}, {Label: "退出", Click: func(*mygo.MenuItem, *mygo.Window) { a.shutdown(); mygo.App.Quit() }}})})
 		if err == nil {
 			a.tray = tray
 		}
+		a.applyAppIcon()
 		if !a.demo {
 			a.loadTopics(1)
 		}

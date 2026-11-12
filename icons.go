@@ -4,9 +4,12 @@ import (
 	"bytes"
 	_ "embed"
 	"image/png"
+	"runtime"
 	"sync"
 
+	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
+	"ngareader/internal/local"
 )
 
 func svg(path string) *ui.SVG {
@@ -33,17 +36,79 @@ var icons = map[string]*ui.SVG{
 
 //go:embed packaging/icon.png
 var appIconPNG []byte
-var appIconOnce sync.Once
-var appIconBitmap *ui.Bitmap
+
+//go:embed packaging/icon-office.png
+var officeIconPNG []byte
+
+type appIconAsset struct {
+	raw    []byte
+	once   sync.Once
+	bitmap *ui.Bitmap
+}
+
+var workIcon = &appIconAsset{raw: appIconPNG}
+var officeIcon = &appIconAsset{raw: officeIconPNG}
+
+func appIconFor(style string) *appIconAsset {
+	if style == "office" {
+		return officeIcon
+	}
+	return workIcon
+}
+
+func appIconPNGFor(style string) []byte { return appIconFor(style).raw }
 
 func windowIcon() []byte { return appIconPNG }
-func appLogo(c *ui.Context, size float32) ui.Element {
-	appIconOnce.Do(func() {
-		img, err := png.Decode(bytes.NewReader(appIconPNG))
+func appLogoFor(c *ui.Context, size float32, style string) ui.Element {
+	asset := appIconFor(style)
+	asset.once.Do(func() {
+		img, err := png.Decode(bytes.NewReader(asset.raw))
 		if err != nil {
 			panic("invalid embedded app icon")
 		}
-		appIconBitmap = ui.NewBitmap(img)
+		asset.bitmap = ui.NewBitmap(img)
 	})
-	return ui.Image(c, appIconBitmap).Size(size, size)
+	return ui.Image(c, asset.bitmap).Size(size, size)
+}
+
+func (a *reader) selectAppIcon(style string) {
+	if style != "work" && style != "office" {
+		return
+	}
+	if a.state.AppIcon == style {
+		return
+	}
+	next := a.state
+	next.AppIcon = style
+	if !a.demo {
+		if err := local.Save(a.dir, next); err != nil {
+			a.notify(err.Error())
+			return
+		}
+	}
+	a.state = next
+	a.applyAppIcon()
+}
+
+// Only running surfaces change. Never rewrite the executable, application
+// bundle or shortcuts: their packaged icon remains the discreet work mark.
+func (a *reader) applyAppIcon() {
+	if a.win == nil || a.win.IsDestroyed() {
+		return
+	}
+	raw := appIconPNGFor(a.state.AppIcon)
+	failed := a.win.SetIcon(raw) != nil
+	if runtime.GOOS == "darwin" {
+		if err := mygo.App.Dock.SetIcon(raw); err != nil {
+			failed = true
+		}
+	}
+	if a.tray != nil {
+		if err := a.tray.SetIcon(raw, false); err != nil {
+			failed = true
+		}
+	}
+	if failed {
+		a.notify("图标选择已保留，部分系统图标更新失败；可重启后重试")
+	}
 }

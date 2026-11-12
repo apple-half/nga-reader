@@ -139,7 +139,7 @@ func (a *reader) readerPane(c *ui.Context, p palette) {
 }
 func (a *reader) emptyReader(c *ui.Context, p palette) {
 	ui.Column(c).Grow(1).MinHeight(0).Padding(36).Center().Gap(14).Children(func() {
-		appLogo(c, 64)
+		appLogoFor(c, 64, a.state.AppIcon)
 		heading := "从左侧选择一个话题"
 		description := "帖子正文和回复会显示在这里。"
 		if !a.client.HasSession() {

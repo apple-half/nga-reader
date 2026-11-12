@@ -317,6 +317,7 @@ func (a *reader) returnToLive() {
 		}
 	}
 	a.applyAppearance()
+	a.applyAppIcon()
 	a.demo = false
 	a.selected = nga.Topic{}
 	a.thread = nga.ThreadPage{}

@@ -32,6 +32,7 @@ type State struct {
 	Favorites        []nga.Topic `json:"favorites"`
 	History          []Reading   `json:"history"`
 	Theme            string      `json:"theme"`
+	AppIcon          string      `json:"appIcon"`
 	FontSize         int         `json:"fontSize"`
 	TextOnly         bool        `json:"textOnly"`
 	RememberLogin    bool        `json:"rememberLogin"`
@@ -48,7 +49,7 @@ type State struct {
 }
 
 func Defaults() State {
-	return State{Boards: []Board{{ID: -7, Name: "大漩涡"}}, Theme: "深色", FontSize: 15, TextOnly: true, LastBoard: -7, SidebarWidth: 180, TopicWidth: 310, WindowWidth: 1280, WindowHeight: 820, AutoCheckUpdates: true, AutoNextPage: true}
+	return State{Boards: []Board{{ID: -7, Name: "大漩涡"}}, Theme: "深色", AppIcon: "work", FontSize: 15, TextOnly: true, LastBoard: -7, SidebarWidth: 180, TopicWidth: 310, WindowWidth: 1280, WindowHeight: 820, AutoCheckUpdates: true, AutoNextPage: true}
 }
 
 func Load(dir string) (State, error) {
@@ -73,6 +74,9 @@ func Load(dir string) (State, error) {
 }
 
 func normalize(s *State) {
+	if s.AppIcon != "office" {
+		s.AppIcon = "work"
+	}
 	if len(s.Boards) == 0 {
 		s.Boards = Defaults().Boards
 	}

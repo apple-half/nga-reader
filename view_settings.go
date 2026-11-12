@@ -37,6 +37,7 @@ func (a *reader) dialogs(c *ui.Context, p palette) {
 			ui.Textf(c, "%d px", a.state.FontSize).Width(44).TextAlign(ui.Center)
 			ui.Button(c, "A+").Label("增大字号").Disabled(a.state.FontSize >= 22).OnClick(func() { a.state.FontSize++; a.save() })
 		})
+		a.iconSettings(c)
 		ui.Text(c, "图片默认折叠，点击正文中的“展示图片”后，在 App 内打开预览。关闭预览会释放图片引擎。").FontSize(12).TextColor(c.Theme().TextMuted).LineHeight(1.7)
 		ui.Button(c, "恢复默认分栏").OnClick(a.resetLayout)
 		ui.Checkbox(c, &a.state.AutoNextPage, "滚动到底部自动加载下一页").OnChange(a.save)
@@ -83,6 +84,29 @@ func (a *reader) dialogs(c *ui.Context, p palette) {
 			ui.Text(c, a.formError).FontSize(12).TextColor(c.Theme().Danger)
 		}
 		ui.Row(c).Justify(ui.End).Children(func() { ui.PrimaryButton(c, "导入并验证").OnClick(a.importSession) })
+	})
+}
+
+func (a *reader) iconSettings(c *ui.Context) {
+	ui.Column(c.Key("app-icon-settings")).Gap(8).Children(func() {
+		ui.Text(c, "应用图标").FontWeight(500)
+		for _, item := range []struct{ id, title string }{{"work", "简约工作"}, {"office", "工位摸鱼"}} {
+			selected := a.state.AppIcon == item.id
+			button := ui.ButtonBase(c.Key(item.id)).Label("使用"+item.title+"图标").FillWidth().Padding(8, 10).Gap(12).Radius(8).Border(1, c.Theme().Border)
+			if selected {
+				button.Background(c.Theme().SurfacePressed)
+			} else if button.Hovered() {
+				button.Background(c.Theme().SurfaceHover)
+			}
+			button.Children(func() {
+				appLogoFor(c, 32, item.id)
+				ui.Text(c, item.title).Grow(1)
+				if selected {
+					ui.Text(c, "已选用").FontSize(12).TextColor(c.Theme().TextMuted)
+				}
+			}).OnClick(func() { a.selectAppIcon(item.id) })
+		}
+		ui.Text(c, "立即切换应用内与运行中的图标；程序文件、快捷方式图标固定为简约工作。演示模式中的选择不保存。").FontSize(12).LineHeight(1.7).TextColor(c.Theme().TextMuted)
 	})
 }
 func (a *reader) applyAppearance() {

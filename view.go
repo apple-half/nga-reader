@@ -158,7 +158,7 @@ func (a *reader) view(c *ui.Context) {
 func (a *reader) titlebar(c *ui.Context, p palette) {
 	bar := c.TitleBar()
 	ui.Row(c).Height(max(44, bar.Height)).Padding(0, bar.Right+13, 0, bar.Left+13).Gap(9).Background(p.side).BorderWidth(0, 0, 1, 0).BorderColor(c.Theme().Border).DragWindow().Children(func() {
-		appLogo(c, 24)
+		appLogoFor(c, 24, a.state.AppIcon)
 		label := "收起板块栏"
 		if a.state.SidebarHidden {
 			label = "展开板块栏"
