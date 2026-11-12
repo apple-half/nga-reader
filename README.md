@@ -10,13 +10,13 @@
 
 **[打开简洁下载页 → Windows / Mac 免安装版](DOWNLOAD.md)**
 
-当前版本：0.1.9 便携预发布。按系统选择下方 ZIP 即可：
+当前版本：0.1.10 便携预发布。按系统选择下方 ZIP 即可：
 
 | 系统 | 下载 | 使用方法 |
 | --- | --- | --- |
-| Windows x64 | [Windows 便携 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.9/NGAReader-0.1.9-Windows-x64-portable.zip) | 解压整个文件夹，双击 `NGAReader.exe` |
-| Mac Apple 芯片（M 系列） | [Apple 芯片 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.9/NGAReader-0.1.9-macOS-AppleSilicon-portable.zip) | 解压后打开 `NGAReader.app` |
-| Mac Intel | [Intel ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.9/NGAReader-0.1.9-macOS-Intel-portable.zip) | 解压后打开 `NGAReader.app` |
+| Windows x64 | [Windows 便携 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.10/NGAReader-0.1.10-Windows-x64-portable.zip) | 解压整个文件夹，双击 `NGAReader.exe` |
+| Mac Apple 芯片（M 系列） | [Apple 芯片 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.10/NGAReader-0.1.10-macOS-AppleSilicon-portable.zip) | 解压后打开 `NGAReader.app` |
+| Mac Intel | [Intel ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.10/NGAReader-0.1.10-macOS-Intel-portable.zip) | 解压后打开 `NGAReader.app` |
 
 无需安装向导或管理员权限。Mac 最低 macOS 12，不强制复制到 Applications。可用 Release 的 `SHA256SUMS.txt` 核对下载内容。程序没有商业代码签名或 Apple 公证，且尚无本版的 360 放行结论，详见下方安全说明。
 
@@ -35,6 +35,7 @@
 - 点击页码输入跳转、首页／末页、从头阅读、回到本页顶部；Ctrl／Command + L打开帖子链接。
 - 原生文字发帖、普通回复与引用回复，可选择发布板块和主题分类；暂不上传图片。
 - 按账号与目标自动保存草稿；发送前保留记录，超时后先核查结果，防止重复发表。
+- 按名称、简介或别名搜索 NGA 首页公开板块，直接添加并打开；内置目录，离线也可搜索。
 - 导入 NGA 账号收藏的普通板块；本地收藏帖子、最近阅读、自定义板块。
 - 深色、浅色、跟随系统，以及「NGA经典屎黄色」主题。
 - 图片默认折叠，点击「展示图片」后才请求；关闭预览后释放临时 WebView。
@@ -44,9 +45,15 @@
 - 启动后自动检查 GitHub 签名更新；有新版时提示，点击后才下载和安装，完成后手动重启。
 - App内提供简短格式化的升级说明；版本、下载进度与安装／重启操作清楚可见，完整说明可打开发布页查看。
 
+## 搜索并添加板块
+
+点击“我的板块”旁的 **+**，输入“汽车”“数码”“大漩涡”等名称，点击结果旁“添加并打开”。已有板块直接打开并保留自定义名称。目录来自NGA首页公开入口，内置快照并缓存，打开窗口时过期24小时才后台刷新；搜索在本机完成，无需登录。合集暂不支持原生添加，提供“官网查看”；也保留链接或编号添加。
+
+![按名称搜索板块](docs/images/board-search.png)
+
 ## 软件更新
 
-0.1.6及更早版本需要手动下载一次新版；0.1.7若检查更新一直显示HTTP403，也请手动下载一次0.1.9。退出旧版，保留原数据目录。正式便携版启动10秒后检查更新，此后每24小时检查；可在侧栏“软件更新”关闭自动检查，或随时手动检查。检查失败可继续阅读。
+0.1.6及更早版本需要手动下载一次新版；0.1.7若检查更新一直显示HTTP403，也请手动下载一次0.1.10。退出旧版，保留原数据目录。正式便携版启动10秒后检查更新，此后每24小时检查；可在侧栏“软件更新”关闭自动检查，或随时手动检查。检查失败可继续阅读。
 
 0.1.8优先读取公开的签名更新索引，再按需使用GitHub Releases API；API限额时提示重试时间和简洁下载页。索引里的安装元数据仍需通过内置公钥验证，不携带NGA登录数据。
 
@@ -127,7 +134,7 @@ python packaging/package.py --target windows-amd64
 
 官方网页、图床验证及系统代理配置可能引发相应网络请求。本项目遵守论坛登录、权限和频率限制，不提供绕过验证、发帖、投票或批量操作功能。
 
-**杀毒状态：** Windows 0.1.2 构建曾被 360 检出为 `Trojan.Win64.SilverFox.ZAX`。包含 0.1.2 / 0.1.3 样本的复核申请未通过；收到的回复未给出具体检出依据。当前版本为 0.1.9，尚无该版本的 360 放行结论。Windows 程序没有 Authenticode 签名，Mac 只有 ad-hoc 完整性签名，没有 Developer ID 签名或 Apple 公证，系统可能阻止启动。公开源码、功能测试、校验值及依赖漏洞扫描不能替代恶意软件鉴定。详情见 [安全说明](SECURITY.md)。
+**杀毒状态：** Windows 0.1.2 构建曾被 360 检出为 `Trojan.Win64.SilverFox.ZAX`。包含 0.1.2 / 0.1.3 样本的复核申请未通过；收到的回复未给出具体检出依据。当前版本为 0.1.10，尚无该版本的 360 放行结论。Windows 程序没有 Authenticode 签名，Mac 只有 ad-hoc 完整性签名，没有 Developer ID 签名或 Apple 公证，系统可能阻止启动。公开源码、功能测试、校验值及依赖漏洞扫描不能替代恶意软件鉴定。详情见 [安全说明](SECURITY.md)。
 
 ## 开发与验证
 
@@ -141,7 +148,7 @@ Node.js 仅用于可选的登录页脚本测试，构建和运行软件不依赖
 
 当前回归测试覆盖 API / 静态正文解析、分页、会话加密、登录引导、主题保存、图片按需展示和内置帮助。论坛接口不稳定，复杂视频、部分 BBCode 和表情可能降级显示，可打开原帖查看。
 
-0.1.9的升级提示修复、独立复核与兼容边界见[验证记录](docs/validation-0.1.9.md)；此前的阅读体验体检见[0.1.8记录](docs/validation-0.1.8.md)。
+0.1.10的板块搜索与验证范围见[验证记录](docs/validation-0.1.10.md)；0.1.9的升级提示修复、独立复核与兼容边界见[验证记录](docs/validation-0.1.9.md)；此前的阅读体验体检见[0.1.8记录](docs/validation-0.1.8.md)。
 
 目录说明：
 
