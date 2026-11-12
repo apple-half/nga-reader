@@ -1,6 +1,6 @@
 # NGA Reader · 工作台
 
-<img src="packaging/icon.png" width="112" alt="戴眼镜穿格子衫的中年男性在工位刷NGA的卡通图标" />
+<img src="packaging/icon.png" width="112" alt="NGA Reader 简约工作图标" />
 
 用 Go 和 [MyGo](https://github.com/egoist/mygo) 编写的 NGA 桌面阅读器。采用类似 Codex 的三栏布局：左侧板块，中间话题列表，右侧正文与回复。
 
@@ -13,6 +13,8 @@
 **[打开简洁下载页 → Windows / Mac 免安装版](DOWNLOAD.md)**
 
 当前版本：0.1.13 正式版 · 免安装便携版。按系统选择下方 ZIP 即可：
+
+主分支源码已新增可选图标：在“阅读设置 → 应用图标”切换简约工作与工位摸鱼，并记住选择。此功能尚未包含在下方0.1.13下载包中，见[图标设计](docs/logo-design.md)及[验证记录](docs/validation-selectable-icon.md)。
 
 | 系统 | 下载 | 使用方法 |
 | --- | --- | --- |

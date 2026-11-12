@@ -9,3 +9,5 @@ Approaches: runtime selection alone leaves the conspicuous cartoon in Explorer/F
 Apply immediately to native header, empty reader, current window, tray and macOS Dock through public MyGo APIs. File/shortcut/Finder icons stay the packaged work icon; never rewrite EXE, bundle, shortcut or pinned-icon caches. Explain the scope next to the controls. Save before changing the non-demo live state; failed save retains old selection and shows error. Demo changes remain temporary. Unknown/missing stored icon values fall back to work. No network or forum/account behavior changes, no dependencies, no signing key use.
 
 Scope: implement and validate locally; do not replace the already published0.1.13 assets or publish a new release in this task. Keep D-drive software/data untouched. Native Windows/macOS behavior needs actual platform verification; cross compilation is not GUI proof.
+
+Follow-up authorization2026-11-12: user requested updating GitHub. Fast-forward the verified source to main and push; keep published0.1.13 assets, tags and update indexes unchanged. A new binary release remains separate.
