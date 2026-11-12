@@ -1,14 +1,14 @@
 {
   "manifest": {
-    "version": "0.1.8",
-    "notes": "## 下载免安装版\n\n**[打开简洁下载页 → 只看 Windows 和 Mac 免安装包](https://github.com/apple-half/nga-reader/blob/main/DOWNLOAD.md)**\n\n| 你的电脑 | 直接下载 | 打开方式 |\n| --- | --- | --- |\n| **Windows 64 位** | **[下载 Windows 免安装包](https://github.com/apple-half/nga-reader/releases/download/v0.1.8/NGAReader-0.1.8-Windows-x64-portable.zip)** | 解压整个文件夹，双击 `NGAReader.exe` |\n| **Mac · Apple 芯片（M 系列）** | **[下载 Mac M 系列免安装包](https://github.com/apple-half/nga-reader/releases/download/v0.1.8/NGAReader-0.1.8-macOS-AppleSilicon-portable.zip)** | 解压后打开 `NGAReader.app` |\n| **Mac · Intel 芯片** | **[下载 Mac Intel 免安装包](https://github.com/apple-half/nga-reader/releases/download/v0.1.8/NGAReader-0.1.8-macOS-Intel-portable.zip)** | 解压后打开 `NGAReader.app` |\n\nMac 用户可在“苹果菜单 → 关于本机”查看芯片。最低支持 macOS 12。\n\n**从旧版升级：先退出旧版，替换程序并保留原数据目录。** 0.1.6及更早版本，或0.1.7检查更新一直显示HTTP403时，请手动下载一次0.1.8。\n\n<details>\n<summary>展开查看更新说明与使用提醒</summary>\n\n### 本版改进\n\n- **更新检查403**：优先读取GitHub公开签名索引，减少API额度影响；限额提示包含可重试时间，并提供简洁下载页。签名损坏时仍拒绝安装。\n- **已读与新回复**：打开成功后标记已读；论坛回复数增加时标记“有新回复”，不冒充精确未读数量。\n- **继续上次阅读**：保存页码及具体楼层，重启或再次打开可继续阅读；按账号隔离，保留最近100条。“只看楼主”不覆盖完整帖子的进度，可点“从头阅读”重置。\n- **页码导航**：点击页码直接输入，支持首页／末页、全角数字及Enter；总页数未知时不猜末页。粘贴链接保留页码，支持`page=e`末页链接。\n- **交互整理**：刷新同页列表保留内容并显示加载／重试状态；账号切换清空旧阅读内容；增加Ctrl／Command + L打开链接和回到本页顶部；更新弹窗在无新版说明时缩短。三种主题在980×620窗口检查分页控件和弹窗布局。\n\n内置使用说明已同步更新。以上读取与UI操作不会自动发帖或回复。\n\n### 自动更新\n\n- 正式便携版启动10秒后自动检查，此后每24小时检查。发现新版会在侧栏提示，可查看版本说明；不会自动下载、安装或重启。\n- 点击“下载并安装”后显示进度，校验更新签名再替换程序；完成后点击“重启使用新版”。可在侧栏“软件更新”关闭自动检查或手动检查。\n- 保留设置、收藏、历史、草稿和待确认发送记录。发帖或回复发送期间禁止安装；保存失败时中止更新。勾选“记住本机登录”的会话会保存，仅本次有效的登录在重启后需重新登录。\n- Windows保留程序名NGAReader.exe并放在可写文件夹；Mac先解压再运行。程序位置不支持自动安装时，按提示手动下载便携ZIP。\n- 更新包及元数据通过Ed25519签名，绑定版本、平台、地址和摘要。私钥离线保存，GitHub Actions核验全部签名和发布文件后公开。\n\nWindows数据位于EXE同级`data`，Mac位于`~/Library/Application Support/NGAReader`。图片仍默认折叠、点击才加载；Windows官方登录和图片预览需要已有WebView2 Runtime。文字发帖与回复等既有功能继续保留，使用说明已集成软件。\n\n### 验证范围与安全状态\n\n- 回归测试覆盖签名索引／API限额、失败关闭、阅读记录迁移、账号与筛选隔离、楼层恢复及手动滚动、页码输入和原生控件。Windows更新使用隔离程序目录和模拟数据验证，不替换用户正在使用的程序。\n- GitHub Actions在Windows x64、macOS arm64与Intel环境测试、构建和检查包结构，Mac检查ad-hoc签名。这些检查不覆盖全部真实GUI操作；Mac实际更新仍需真机使用核验。\n- Windows没有Authenticode签名；Mac仅有ad-hoc完整性签名，没有Apple Developer ID或公证。更新签名不等同于系统代码签名，系统仍可能阻止启动。\n- 早期Windows 0.1.2曾被360检出，0.1.2/0.1.3复核未通过且未提供具体依据。**0.1.8尚无360放行结论**；功能测试、更新签名与源码公开不能代替恶意软件鉴定。\n- `SHA256SUMS.txt`核对三份ZIP和六份更新资产的下载内容，不构成安全认证；包内保留MIT及依赖许可。\n\n</details>\n\n<details>\n<summary>开发者附件说明</summary>\n\n下方 Assets 中的 `.tar.gz` 和 `update-*.json` 是软件自动更新附件；`SHA256SUMS.txt` 用于校验，Source code 是源码。日常使用请直接点击上方对应系统的免安装包链接。\n\n</details>\n",
-    "date": "2026-11-11T11:24:08Z",
+    "version": "0.1.9",
+    "notes": "本次更新\n\n- 升级弹窗重新排版，突出版本和本次改动。\n- 更新说明改为简短列表，不再混入下载表格和长链接。\n- 下载进度、错误提示、安装与重启按钮固定可见。\n- 包含已读／新回复标记、楼层续读和页码跳转。\n\n更新保留设置、收藏、历史和草稿，重启后生效。\n0.1.7持续提示403时，请从发布页手动下载一次新版。\n",
+    "date": "2026-11-12T00:58:24Z",
     "target": "windows-amd64",
-    "url": "https://github.com/apple-half/nga-reader/releases/download/v0.1.8/nga-reader-0.1.8-windows-amd64.tar.gz",
-    "size": 6457617,
-    "sha256": "5249256306ef725205738a2be80875a85934271dd524df809c5528570873094d",
-    "signature": "t3Q3lXkNxnMYn9UGZi6aXBEyjgBXUQZ+Q/MjOCS8+LNZar+m9ZgyNg0oksFH/jAbvQLKQQqFxPctzHNswQg8DQ==",
-    "metadataSignature": "VAApgpelhhu1nupdpB+5edae7BxA9Uk8Kzg99dIY2Olqezbc7yFs8sws6WsXdHiTGqMHbpEG0Wb6IFUTl9RMCg=="
+    "url": "https://github.com/apple-half/nga-reader/releases/download/v0.1.9/nga-reader-0.1.9-windows-amd64.tar.gz",
+    "size": 6461170,
+    "sha256": "261e07a985b124b70a9c171caf7ffd1d10ed6f9b3a3225afc17a7f521c3fa95d",
+    "signature": "ZjDBDp5PcBtL9uuUIJCnyd8E7KcFXVEpqT+GOrc4MgeeszRFSzh8u26/o/J+3+3kaHwsgMX4wBR/3sBsUMjXDg==",
+    "metadataSignature": "8/wi5zH66yAKgoYeH6y2UuuCJ9D6DkdZEZ0IEGiPQIj0ySNsPhUW7+nZmcSy48yyvaTWgecV5DlxS//RoRFUAw=="
   },
   "prerelease": true
 }
