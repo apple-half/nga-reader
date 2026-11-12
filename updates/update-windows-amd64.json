@@ -1,14 +1,14 @@
 {
   "manifest": {
-    "version": "0.1.11",
-    "notes": "本次更新\n\n- 支持NGA自带265个表情，正文与引用原生行内显示。\n- 表情按字号等比例缩放并限制尺寸，不再显示成通用占位文字。\n- 内置表情资源，离线可用；普通图片仍点击才加载。\n- 修复旧数字表情可能吞掉后文，未知表情保留原代码。\n- 深色主题黑线条表情有浅色底衬，脸红动图支持原生播放。\n\n更新保留设置、收藏、历史和草稿，重启后生效。\n0.1.7持续提示403时，请从发布页手动下载一次新版。\n",
-    "date": "2026-11-12T03:52:39Z",
+    "version": "0.1.13",
+    "notes": "本次更新\n\n- 滚动到底自动续页，刷新保留正文和阅读位置。\n- 优化小窗口布局，支持板块管理、阅读前进后退和正文查找。\n- 新增正文预览、草稿保存时间及点击式图片图集和缩放。\n- 修复复制丢失表情、代码内容误触发动图重绘。\n- 启用“工位摸鱼刷NGA”中年眼镜格子衫男性卡通图标。\n- 首个正式发布版本，保留Windows与两种Mac免安装包。\n\n更新保留设置、收藏、历史和草稿，重启后生效。\n0.1.7持续提示403时，请从发布页手动下载一次新版。\n\n连续阅读每段最多10页或200楼，达到上限后点击继续下一段。\n",
+    "date": "2026-11-12T07:10:52Z",
     "target": "windows-amd64",
-    "url": "https://github.com/apple-half/nga-reader/releases/download/v0.1.11/nga-reader-0.1.11-windows-amd64.tar.gz",
-    "size": 7242119,
-    "sha256": "409365f6b1873943b1f6697e18087e5df262ed85cdc96d7515fab4706f99e03e",
-    "signature": "x81mpW9Aj4kN/y/1nrluk4bBjjyfL8GyaNy1oaboOckMXA6mq3kwrBVlFa02JLTGPwxpjFQFEyG6dJ3l+n9fBw==",
-    "metadataSignature": "p/l7YQC6fV9ZjfOZHsznu4L6FoPTPGxlk0ctVZk9i5/KFUE5ZWLKqjXJhfxeh59POCjvNQH/Sk6RhWvTHbjRDQ=="
+    "url": "https://github.com/apple-half/nga-reader/releases/download/v0.1.13/nga-reader-0.1.13-windows-amd64.tar.gz",
+    "size": 8869028,
+    "sha256": "fbb92458d58c68c81d411da15095da824fda447c171e3f90a02acec07d11754b",
+    "signature": "MgWwKj0QDwZMSIlhjzrLkPaKaDf9bDMI0COpO/lXUHIvkBSvZwy5sp3Vz+OdnPlEIpotOR9ul4OPf7RiD1yaAg==",
+    "metadataSignature": "em1JY0i0FUE9VKLX5XqU0U31rvoOgi8Q6XyCa/wdxQb8kAuV+HCt+h8Br6K4+E+HVLb3/zki04IWHF9DIp9YBQ=="
   },
-  "prerelease": true
+  "prerelease": false
 }

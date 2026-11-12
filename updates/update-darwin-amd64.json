@@ -1,14 +1,14 @@
 {
   "manifest": {
-    "version": "0.1.11",
-    "notes": "本次更新\n\n- 支持NGA自带265个表情，正文与引用原生行内显示。\n- 表情按字号等比例缩放并限制尺寸，不再显示成通用占位文字。\n- 内置表情资源，离线可用；普通图片仍点击才加载。\n- 修复旧数字表情可能吞掉后文，未知表情保留原代码。\n- 深色主题黑线条表情有浅色底衬，脸红动图支持原生播放。\n\n更新保留设置、收藏、历史和草稿，重启后生效。\n0.1.7持续提示403时，请从发布页手动下载一次新版。\n",
-    "date": "2026-11-12T03:52:39Z",
+    "version": "0.1.13",
+    "notes": "本次更新\n\n- 滚动到底自动续页，刷新保留正文和阅读位置。\n- 优化小窗口布局，支持板块管理、阅读前进后退和正文查找。\n- 新增正文预览、草稿保存时间及点击式图片图集和缩放。\n- 修复复制丢失表情、代码内容误触发动图重绘。\n- 启用“工位摸鱼刷NGA”中年眼镜格子衫男性卡通图标。\n- 首个正式发布版本，保留Windows与两种Mac免安装包。\n\n更新保留设置、收藏、历史和草稿，重启后生效。\n0.1.7持续提示403时，请从发布页手动下载一次新版。\n\n连续阅读每段最多10页或200楼，达到上限后点击继续下一段。\n",
+    "date": "2026-11-12T07:10:52Z",
     "target": "darwin-amd64",
-    "url": "https://github.com/apple-half/nga-reader/releases/download/v0.1.11/nga-reader-0.1.11-darwin-amd64.tar.gz",
-    "size": 7281006,
-    "sha256": "9f0f15460d76972c3f17501e5b0af623ea3a753198f57eebe3a27b7e73d23a69",
-    "signature": "DFCpAtgyo3kbaOQ5N09IcTdcXw2w9eKIZMTJ3ytiqG8Oi5KUgzOGxeFx01IzHqVj7IbHAISmN2v/qIjI3uAMAQ==",
-    "metadataSignature": "8Qyx8RrNavPhnIkHgbdrBdB6iMnw2X7JzDeuuiZIruU4lwCE0/EHWlanTd/5Q0dXd87qNsw7WxVLGQE2JTnEAQ=="
+    "url": "https://github.com/apple-half/nga-reader/releases/download/v0.1.13/nga-reader-0.1.13-darwin-amd64.tar.gz",
+    "size": 10589301,
+    "sha256": "932a50d615ae1ef7d666aacbeb022cbf7b9b7ab7b0ff3f1e1206ac961cde57ac",
+    "signature": "T3DBTj5IO/n6gOntbHKtEbWom2VFikl6L7kHzP1yrsUBzIjujRZNp61XxR93FUm8ndzOMqyQ2jMumbIoKi8FCg==",
+    "metadataSignature": "aTKzL+1ZZmlQXIzM6JRMZMNfSGLLMwHLY2nHklHwEl9ra450s5p4U12DW4WiSQjzKRk4ucUH2Lyr5aPgRJdTAw=="
   },
-  "prerelease": true
+  "prerelease": false
 }
