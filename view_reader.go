@@ -98,7 +98,7 @@ func (a *reader) readerPane(c *ui.Context, p palette) {
 							})
 							markdown.View(c, post.source, a.md).FillWidth()
 						})
-						rows = append(rows, readingRow{Post: post.post, Bounds: row.Bounds()})
+						rows = append(rows, readingRow{Post: post.post, Bounds: row.Bounds(), Animated: post.animated})
 					}
 					if len(a.rendered) == 0 {
 						ui.Text(c, "这一页没有可显示的回复").TextColor(c.Theme().TextMuted)
@@ -106,6 +106,9 @@ func (a *reader) readerPane(c *ui.Context, p palette) {
 				})
 			})
 			a.observeReadingView(c, viewport.Bounds(), rows)
+			if animatedEmoteVisible(viewport.Bounds(), rows) {
+				c.After(a.emoteView.nextFrameDelay())
+			}
 		}
 		a.readerNavigation(c, p)
 	})

@@ -9,6 +9,7 @@ import (
 
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
+	"ngareader/internal/emotes"
 	"ngareader/internal/local"
 	"ngareader/internal/nga"
 )
@@ -183,6 +184,9 @@ func (a *reader) loadThreadAt(page int, fromStart bool) {
 }
 func (a *reader) openLink(address string) {
 	address = strings.TrimSpace(address)
+	if _, ok := emotes.FromDestination(address); ok {
+		return
+	}
 	if safe, err := nga.ImageURL(address); err == nil {
 		a.openPicture(safe)
 		return

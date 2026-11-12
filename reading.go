@@ -16,8 +16,9 @@ type readingRestore struct {
 	Quiet        bool
 }
 type readingRow struct {
-	Post   nga.Post
-	Bounds ui.Rect
+	Post     nga.Post
+	Bounds   ui.Rect
+	Animated bool
 }
 type readingViewState struct {
 	Pending                    *readingRestore

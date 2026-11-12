@@ -18,8 +18,9 @@ import (
 )
 
 type renderedPost struct {
-	post   nga.Post
-	source string
+	post     nga.Post
+	source   string
+	animated bool
 }
 type reader struct {
 	dir                                           string
@@ -77,6 +78,7 @@ type reader struct {
 	linkLastTopic                                 int64
 	runReadTask                                   func(func())
 	md                                            *markdown.Options
+	emoteView                                     emoticonRenderer
 	rendered                                      []renderedPost
 	settingsOpen, addOpen, linkOpen, cookieOpen   bool
 	helpOpen                                      bool
@@ -194,12 +196,13 @@ func (a *reader) displayTopics() []nga.Topic {
 	return out
 }
 func (a *reader) resetMarkdown() {
-	// No LoadImage callback: the reader never requests unopened images,
-	// including raw Markdown images that appear in user-provided post text.
-	a.md = &markdown.Options{OnLink: a.openLink, WrapCode: true, Block: a.imageLinkBlock}
+	// LoadImage stays nil: only fixed embedded emoticons get an inline bitmap.
+	// Attachments and arbitrary Markdown images cannot make network requests.
+	a.md = &markdown.Options{OnLink: a.openLink, WrapCode: true, Block: a.imageLinkBlock, LinkIcon: a.emoteView.inline}
 	a.rendered = nil
 	for _, p := range a.thread.Posts {
-		a.rendered = append(a.rendered, renderedPost{post: p, source: nga.MarkdownOnDemand(p.Content)})
+		source := nga.MarkdownOnDemand(p.Content)
+		a.rendered = append(a.rendered, renderedPost{post: p, source: source, animated: containsAnimatedEmote(source)})
 	}
 }
 func (a *reader) shutdown() {
