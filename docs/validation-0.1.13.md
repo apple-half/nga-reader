@@ -4,4 +4,20 @@
 
 首次v0.1.12三平台CI中，Mac arm64原生测试失败于设置按钮标签高度：完整高度15.31px被写死的Windows16px阈值判错。修正为同平台同控件完整高度基准比较，仍检查滚动后控件确实可完整操作，不跳过测试。该变更只涉及测试判定，不更改软件布局行为。原失败标签保留，不创建公开0.1.12 Release。
 
-v0.1.13原生CI、签名及正式发布的最终结果待核验后补充。
+## 正式发布结果
+
+- [三平台原生构建 43172389622](https://github.com/apple-half/nga-reader/actions/runs/43172389622)全部通过：Go测试及vet、Node登录脚本、22项Python打包测试、原生构建、ZIP结构和许可输出；Mac另通过ad-hoc签名检查。
+- 下载三个CI artifact，核对外层ZIP大小及SHA256；每份只含对应免安装ZIP。内部ZIP结构、摘要与发布草稿一致。
+- 本地离线签名三个更新包及元数据，用公开密钥验证全部签名、归档和对应ZIP内容；App短说明与`packaging/update-notes.txt`逐字一致。
+- 在独立测试目录运行实际MyGo Windows更新器，更新后EXE与CI包内EXE字节一致，SHA256为`53fe3dc6c04bf51f328544fc22f793071bced4ec930c27c5c712ad7215a42693`。四份模拟设置、草稿和用户文件保持原样；安装后的`--licenses`通过。没有操作用户实际运行的程序或账号数据。
+- [发布流程 43173826968](https://github.com/apple-half/nga-reader/actions/runs/43173826968)验证完整草稿后发布；[v0.1.13](https://github.com/apple-half/nga-reader/releases/tag/v0.1.13)已公开，`draft=false`、`prerelease=false`，并成为Latest。
+- 重新下载全部10份公开附件：大小和SHA256均与离线原件及GitHub摘要一致，`SHA256SUMS.txt`含9条有效记录，三个便携包结构及更新签名再次通过。
+- 三个公开更新索引与签名元数据相同，均标记正式版。生产客户端使用系统代理实际读取三个公开索引，均返回0.1.13及正确短说明，0次GitHub API回退，不携带Cookie或Authorization。
+
+## 验证边界
+
+真实Mac GUI及升级、系统WebView验证和缩放、真实账号发帖权限没有在本轮实机验收；原生CI不能替代这些检查。没有向论坛发送测试帖子。
+
+独立审查的一个Minor问题暂缓：含表情的文档中，另一个不含表情的普通表格复制时使用段落分隔，而非TSV制表符；文字完整保留。普通无表情文档保持原Markdown复制方式。表情文档复制明确采用纯文本及NGA表情代码，不携带富文本格式。
+
+新版尚无360放行结论；源码公开、功能检查和更新签名不等同于安全软件认证。
