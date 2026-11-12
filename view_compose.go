@@ -5,6 +5,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/egoist/mygo/ui"
+	"github.com/egoist/mygo/ui/markdown"
 	"ngareader/internal/nga"
 )
 
@@ -79,11 +80,37 @@ func (a *reader) composerView(c *ui.Context) {
 					ui.Text(c, s.Draft.Label).FontSize(13).FontWeight(500).LineHeight(1.5)
 					ui.Text(c, s.BoardChoice).FontSize(11).TextColor(c.Theme().TextMuted)
 				}
-				ui.TextArea(c.Key("compose-body"), &s.Draft.Content).Label("正文").Placeholder("写下你想说的话…\n支持文字和 NGA BBCode，不上传图片。").Height(210).FillWidth().MaxLength(2 * nga.MaxPostContentRunes).Disabled(locked).OnChange(func() { a.saveComposer() })
+				ui.Row(c).Gap(6).Children(func() {
+					ui.Button(c, "编辑").Label("编辑正文").Disabled(!s.Preview).OnClick(func() { s.Preview = false })
+					ui.Button(c, "预览").Label("预览正文").Disabled(s.Preview).OnClick(func() { s.Preview = true })
+					ui.Text(c, "预览不会发表内容").FontSize(11).TextColor(c.Theme().TextMuted)
+				})
+				if s.Preview {
+					ui.Column(c.Key("compose-preview")).FillWidth().MinHeight(210).Padding(12).Background(c.Theme().Surface).Radius(7).Children(func() {
+						if s.Draft.Target.Action == "new" && s.Draft.PostSubject() != "" {
+							ui.Text(c, s.Draft.PostSubject()).FontSize(18).FontWeight(500).Margin(0, 0, 12, 0)
+						}
+						if s.Draft.Content == "" {
+							ui.Text(c, "还没有正文，返回编辑后即可预览。").TextColor(c.Theme().TextMuted)
+						} else {
+							source := nga.MarkdownOnDemand(s.Draft.Content)
+							markdown.View(c, source, a.md).FillWidth()
+							if containsAnimatedEmote(source) {
+								c.After(a.emoteView.nextFrameDelay())
+							}
+						}
+					})
+				} else {
+					ui.TextArea(c.Key("compose-body"), &s.Draft.Content).Label("正文").Placeholder("写下你想说的话…\n支持文字和 NGA BBCode，不上传图片。").Height(210).FillWidth().MaxLength(2 * nga.MaxPostContentRunes).Disabled(locked).OnChange(func() { a.saveComposer() })
+				}
 				ui.Row(c).Gap(8).Children(func() {
 					hint := "Enter 换行 · 草稿自动保存到本机"
 					if a.demo {
 						hint = "Enter 换行 · 离线演示"
+					} else if s.SaveError != "" {
+						hint = "草稿尚未保存，请保留编辑器并重试"
+					} else if !s.SavedAt.IsZero() {
+						hint = "草稿已保存 · " + s.SavedAt.Format("15:04:05") + " · Enter 换行"
 					}
 					ui.Text(c, hint).FontSize(11).TextColor(c.Theme().TextMuted).Grow(1)
 					ui.Textf(c, "%d / %d", utf8.RuneCountInString(s.Draft.Content), nga.MaxPostContentRunes).FontSize(11).TextColor(c.Theme().TextMuted)

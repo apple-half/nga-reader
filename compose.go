@@ -31,6 +31,8 @@ type composerState struct {
 	CategoryChoice, BoardChoice     string
 	Error, SaveError, Info          string
 	RetryAcknowledged               bool
+	Preview                         bool
+	SavedAt                         time.Time
 }
 
 func (a *reader) postClient() postingAPI {
@@ -83,7 +85,7 @@ func (a *reader) openComposer(target nga.PostTarget, label string) {
 			}
 		}
 	}
-	a.compose = composerState{Open: true, Draft: draft, CategoryChoice: "不加分类", BoardChoice: a.composeBoardLabel(draft.Target.FID)}
+	a.compose = composerState{Open: true, Draft: draft, CategoryChoice: "不加分类", BoardChoice: a.composeBoardLabel(draft.Target.FID), SavedAt: draft.UpdatedAt}
 	if draft.Category != "" {
 		a.compose.CategoryChoice = draft.Category
 	}
@@ -201,6 +203,7 @@ func (a *reader) saveComposer() bool {
 	}
 	a.drafts = next
 	a.compose.SaveError = ""
+	a.compose.SavedAt = a.compose.Draft.UpdatedAt
 	return true
 }
 
