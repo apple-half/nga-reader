@@ -1,14 +1,14 @@
 {
   "manifest": {
-    "version": "0.1.13",
-    "notes": "本次更新\n\n- 滚动到底自动续页，刷新保留正文和阅读位置。\n- 优化小窗口布局，支持板块管理、阅读前进后退和正文查找。\n- 新增正文预览、草稿保存时间及点击式图片图集和缩放。\n- 修复复制丢失表情、代码内容误触发动图重绘。\n- 启用“工位摸鱼刷NGA”中年眼镜格子衫男性卡通图标。\n- 首个正式发布版本，保留Windows与两种Mac免安装包。\n\n更新保留设置、收藏、历史和草稿，重启后生效。\n0.1.7持续提示403时，请从发布页手动下载一次新版。\n\n连续阅读每段最多10页或200楼，达到上限后点击继续下一段。\n",
-    "date": "2026-11-12T07:10:52Z",
+    "version": "0.1.14",
+    "notes": "本次更新\r\n\r\n- 新增“应用图标”选择：简约工作、工位摸鱼。\r\n- 默认使用黑白简约工作图标，选择后立即生效并记住。\r\n- 窗口、托盘和Mac运行中的Dock图标随选择切换。\r\n- 程序文件和快捷方式固定使用简约工作图标。\r\n- 修复非法图标设置值可能重置其他偏好的兼容问题。\r\n\r\n在“阅读设置 → 应用图标”切换；演示模式只临时预览。\r\n阅读、自动续页、发帖回复和点击展示图片继续保留。\r\n更新保留设置、收藏、历史和草稿，完成后重启使用新版。\r\n0.1.7持续提示403时，请从发布页手动下载一次新版。\r\n",
+    "date": "2026-11-12T08:53:34Z",
     "target": "windows-amd64",
-    "url": "https://github.com/apple-half/nga-reader/releases/download/v0.1.13/nga-reader-0.1.13-windows-amd64.tar.gz",
-    "size": 8869028,
-    "sha256": "fbb92458d58c68c81d411da15095da824fda447c171e3f90a02acec07d11754b",
-    "signature": "MgWwKj0QDwZMSIlhjzrLkPaKaDf9bDMI0COpO/lXUHIvkBSvZwy5sp3Vz+OdnPlEIpotOR9ul4OPf7RiD1yaAg==",
-    "metadataSignature": "em1JY0i0FUE9VKLX5XqU0U31rvoOgi8Q6XyCa/wdxQb8kAuV+HCt+h8Br6K4+E+HVLb3/zki04IWHF9DIp9YBQ=="
+    "url": "https://github.com/apple-half/nga-reader/releases/download/v0.1.14/nga-reader-0.1.14-windows-amd64.tar.gz",
+    "size": 9842510,
+    "sha256": "f132d73d7b5d4dbd74a0e2bd977741c0ac5d29d351f90ecdc4ceb69edd1c199f",
+    "signature": "5l0dEGeYudeEdSAl6AYEIKh3pvTPyRIWTfMTIySmzQMvMAXGFOtbdHBAONCH8knGfauIEPOLXEetfpm8Cvr1CQ==",
+    "metadataSignature": "dP4oTtU8lVTjRT+vPWLye2040pdVyRB+UsGci8Ui33sH1Padr+JM18nQRWhCLR02HJt0icmyk37MbodIeP9aCw=="
   },
   "prerelease": false
 }
