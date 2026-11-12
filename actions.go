@@ -146,10 +146,7 @@ func (a *reader) loadThreadAt(page int, fromStart bool) {
 	}
 	authorID := int64(0)
 	if a.onlyAuthor {
-		authorID = a.thread.MainAuthorID
-		if authorID == 0 {
-			authorID = selected.AuthorID
-		}
+		authorID = knownMainAuthorID
 	}
 	if !keep {
 		a.thread = nga.ThreadPage{Topic: selected, Page: page, MainAuthorID: authorID}
@@ -194,12 +191,23 @@ func (a *reader) loadThreadAt(page int, fromStart bool) {
 				result.Topic.Replies = selected.Replies
 			}
 			if keep {
-				if r, ok := local.FindReading(a.state.History, a.selected.ID, a.readingUID()); ok && r.Position != nil {
+				if a.onlyAuthor {
+					// Full-thread progress intentionally does not track filtered
+					// scrolling. Take the latest live filtered anchor at completion,
+					// including scrolling while the refresh was in flight.
+					if a.reading.Anchor != nil {
+						a.reading.Pending = &readingRestore{TopicID: a.selected.ID, UID: a.readingUID(), Page: a.visibleThreadPage(), Position: *a.reading.Anchor, Quiet: true}
+						a.reading.Warm = 0
+					}
+				} else if r, ok := local.FindReading(a.state.History, a.selected.ID, a.readingUID()); ok && r.Position != nil {
 					a.reading.Pending = &readingRestore{TopicID: a.selected.ID, UID: a.readingUID(), Page: r.Page, Position: *r.Position, Quiet: true}
 					a.reading.Warm = 0
 				}
 				a.replaceLoadedPage(result)
 				a.selected = result.Topic
+				if a.reading.Pending != nil {
+					a.reading.Settling = 1
+				}
 				return
 			}
 			a.thread = result

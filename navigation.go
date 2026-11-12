@@ -7,10 +7,11 @@ import (
 )
 
 type readingLocation struct {
-	Topic      nga.Topic
-	Page       int
-	OnlyAuthor bool
-	Position   *local.ReadingPosition
+	Topic        nga.Topic
+	MainAuthorID int64
+	Page         int
+	OnlyAuthor   bool
+	Position     *local.ReadingPosition
 }
 type readingNavigation struct {
 	Back, Forward          []readingLocation
@@ -32,6 +33,10 @@ func (a *reader) ensureNavigationAccount() {
 }
 func (a *reader) captureLocation() readingLocation {
 	loc := readingLocation{Topic: a.selected, Page: a.visibleThreadPage(), OnlyAuthor: a.onlyAuthor, Position: clonePosition(a.reading.Anchor)}
+	loc.MainAuthorID = loc.Topic.AuthorID
+	if a.thread.Topic.ID == loc.Topic.ID && a.thread.MainAuthorID != 0 {
+		loc.MainAuthorID = a.thread.MainAuthorID
+	}
 	if loc.Position == nil && !loc.OnlyAuthor {
 		if r, ok := local.FindReading(a.state.History, loc.Topic.ID, a.readingUID()); ok && r.Page == loc.Page {
 			loc.Position = clonePosition(r.Position)
@@ -98,6 +103,10 @@ func (a *reader) navigateHistory(delta int) {
 	a.onlyAuthor = loc.OnlyAuthor
 	a.linkLastTopic = 0
 	a.continuation = continuationState{}
+	// A restored filter belongs to its destination, never to the thread
+	// that was on screen before history navigation. Clear those old rows.
+	a.thread = nga.ThreadPage{Topic: loc.Topic, Page: max(1, loc.Page), MainAuthorID: loc.MainAuthorID}
+	a.rendered = nil
 	a.reading = readingViewState{}
 	if loc.Position != nil {
 		a.reading.Pending = &readingRestore{TopicID: loc.Topic.ID, UID: a.readingUID(), Page: max(1, loc.Page), Position: *loc.Position, Quiet: true}
