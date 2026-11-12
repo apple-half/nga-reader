@@ -28,7 +28,7 @@ go run ./cmd/update-release verify --dir ../release-files --version X.Y.Z --key 
 签名器默认读取`packaging/update-notes.txt`。保持普通段落与短横线列表、1200字以内，旧版纯文本客户端也能直接阅读。GitHub网页发布仍读取完整`release-notes.md`；两个文件互不复用。发布器验签后还会逐平台核对App说明，拒绝误签成网页说明的文件。已经公开的签名说明不可修改，文案修复随新版本发布。
 
 4. 将六份新文件上传到同一草稿。不要手动点击发布。
-5. 在Release工作流选择`Run workflow`，填写相同标签，勾选`publish_existing`。此模式不重新构建，只下载草稿资产，验证签名及便携ZIP与更新归档逐文件一致，重算九份文件的校验值，核对上传摘要后公开预发布。最终共有十个资产（另两个Source code下载由GitHub生成）。随后使用同一工作流的临时`contents:write`令牌，将已验证的三个签名元数据包装为`updates/update-PLATFORM.json`，一次提交到`main`。不需要增加令牌或将私钥交给CI。
+5. 在Release工作流选择`Run workflow`，填写相同标签，勾选`publish_existing`。此模式不重新构建，只下载草稿资产，验证签名及便携ZIP与更新归档逐文件一致，重算九份文件的校验值，核对上传摘要后公开正式版（`prerelease=false`）并设为Latest。草稿阶段不设Latest。最终共有十个资产（另两个Source code下载由GitHub生成）。随后使用同一工作流的临时`contents:write`令牌，将已验证的三个签名元数据包装为`updates/update-PLATFORM.json`，一次提交到`main`。不需要增加令牌或将私钥交给CI。
 6. 从公开页面重新下载并验证所有资产。可以检查客户端是否识别新版本：
 
 ```powershell

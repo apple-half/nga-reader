@@ -63,7 +63,7 @@ def main(stage_only=False, feed_only=False):
     if stage_only and current and any(asset['name'] in update_asset_names() for asset in current['assets']):
         raise RuntimeError('Draft already contains signed update assets; refusing to rebuild over them')
     if current is None:
-        gh('release', 'create', tag, '--repo', repo, '--verify-tag', '--draft', '--prerelease', '--title', f'NGA Reader {VERSION} · 免安装便携版', '--notes-file', str(ROOT / 'packaging' / 'release-notes.md'))
+        gh('release', 'create', tag, '--repo', repo, '--verify-tag', '--draft', '--prerelease=false', '--latest=false', '--title', f'NGA Reader {VERSION} 正式版 · 免安装便携版', '--notes-file', str(ROOT / 'packaging' / 'release-notes.md'))
     gh('release', 'upload', tag, '--repo', repo, '--clobber', *(str(path) for path in paths))
     uploaded = release(repo, tag)
     assets = {asset['name']: asset for asset in uploaded['assets']}
@@ -78,10 +78,10 @@ def main(stage_only=False, feed_only=False):
         print('Draft ready for offline update signing: ' + uploaded['html_url'])
         return
     # Keep the release as a draft until every platform and checksum file agrees.
-    gh('release', 'edit', tag, '--repo', repo, '--prerelease', '--draft=false')
+    gh('release', 'edit', tag, '--repo', repo, '--prerelease=false', '--draft=false', '--latest')
     final = release(repo, tag)
-    if final['draft'] or not final['prerelease']:
-        raise RuntimeError('Release did not reach the expected public prerelease state')
+    if final['draft'] or final['prerelease']:
+        raise RuntimeError('Release did not reach the expected public stable state')
     publish_feeds(repo, tag, directory, final, gh)
     print(final['html_url'])
 

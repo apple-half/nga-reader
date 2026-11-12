@@ -86,7 +86,7 @@ def verify_archive(path, target):
 
 
 def readme(target):
-    start = f'NGA Reader {VERSION} — 免安装便携预发布\n\n'
+    start = f'NGA Reader {VERSION} — 正式版 · 免安装便携版\n\n'
     if target == 'windows-amd64':
         start += '解压整个 NGAReader 文件夹，双击 NGAReader.exe。无需安装或管理员权限；文件夹应可写。更新前退出旧版，保留原来的 data 文件夹。\n设置与加密会话保存在 EXE 同级 data 目录。官方登录和 App 内图片预览需要已有 WebView2 Runtime。\n'
     else:

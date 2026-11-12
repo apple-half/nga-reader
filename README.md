@@ -1,5 +1,7 @@
 # NGA Reader · 工作台
 
+<img src="packaging/icon.png" width="112" alt="戴眼镜穿格子衫的中年男性在工位刷NGA的卡通图标" />
+
 用 Go 和 [MyGo](https://github.com/egoist/mygo) 编写的 NGA 桌面阅读器。采用类似 Codex 的三栏布局：左侧板块，中间话题列表，右侧正文与回复。
 
 列表和正文由原生 UI 绘制，通过 Go 直接读取论坛数据。官方登录与点击后打开的图片预览使用系统 WebView。
@@ -10,13 +12,13 @@
 
 **[打开简洁下载页 → Windows / Mac 免安装版](DOWNLOAD.md)**
 
-当前版本：0.1.11 便携预发布。按系统选择下方 ZIP 即可：
+当前版本：0.1.12 正式版 · 免安装便携版。按系统选择下方 ZIP 即可：
 
 | 系统 | 下载 | 使用方法 |
 | --- | --- | --- |
-| Windows x64 | [Windows 便携 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.11/NGAReader-0.1.11-Windows-x64-portable.zip) | 解压整个文件夹，双击 `NGAReader.exe` |
-| Mac Apple 芯片（M 系列） | [Apple 芯片 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.11/NGAReader-0.1.11-macOS-AppleSilicon-portable.zip) | 解压后打开 `NGAReader.app` |
-| Mac Intel | [Intel ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.11/NGAReader-0.1.11-macOS-Intel-portable.zip) | 解压后打开 `NGAReader.app` |
+| Windows x64 | [Windows 便携 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.12/NGAReader-0.1.12-Windows-x64-portable.zip) | 解压整个文件夹，双击 `NGAReader.exe` |
+| Mac Apple 芯片（M 系列） | [Apple 芯片 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.12/NGAReader-0.1.12-macOS-AppleSilicon-portable.zip) | 解压后打开 `NGAReader.app` |
+| Mac Intel | [Intel ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.12/NGAReader-0.1.12-macOS-Intel-portable.zip) | 解压后打开 `NGAReader.app` |
 
 无需安装向导或管理员权限。Mac 最低 macOS 12，不强制复制到 Applications。可用 Release 的 `SHA256SUMS.txt` 核对下载内容。程序没有商业代码签名或 Apple 公证，且尚无本版的 360 放行结论，详见下方安全说明。
 
@@ -30,16 +32,21 @@
 
 ## 功能
 
-- 三栏阅读、帖子与回复独立分页、只看楼主、专注阅读。
+- 三栏阅读、侧栏折叠、小窗口正文宽度保护；记忆窗口尺寸，支持恢复默认分栏。
+- 滚动到底自动追加下一页，失败保留正文并重试；每段最多10页或200楼，超长帖子点击继续下一段。
+- 同页刷新保留正文和可见楼层；支持只看楼主、专注阅读、手动分页和跳页。
+- 阅读后退／前进、继续上次阅读，Ctrl／Command + F查找已载入正文。
+- 本地板块重命名、上移／下移、移除；默认隐藏编号。
 - 已读和有新回复标记；按账号保存最近100条帖子的页码及楼层，重新打开继续阅读。
 - 点击页码输入跳转、首页／末页、从头阅读、回到本页顶部；Ctrl／Command + L打开帖子链接。
 - 原生文字发帖、普通回复与引用回复，可选择发布板块和主题分类；暂不上传图片。
-- 按账号与目标自动保存草稿；发送前保留记录，超时后先核查结果，防止重复发表。
+- 按账号与目标自动保存草稿，显示保存时间，支持原生正文预览；发送前保留记录，超时后先核查结果，防止重复发表。
 - 按名称、简介或别名搜索 NGA 首页公开板块，直接添加并打开；内置目录，离线也可搜索。
 - 导入 NGA 账号收藏的普通板块；本地收藏帖子、最近阅读、自定义板块。
 - 深色、浅色、跟随系统，以及「NGA经典屎黄色」主题。
 - NGA自带265个表情原生行内显示，按字号等比例缩放；内置资源，离线可用，支持动态脸红表情。
-- 图片默认折叠，点击「展示图片」后才请求；关闭预览后释放临时 WebView。
+- 图片默认折叠，点击「展示图片」后才请求；支持当前已载入段的图集切换、缩放，关闭预览后释放临时 WebView。
+- 复制含表情正文保留NGA表情代码，代码块中的特殊地址不会误触发动图重绘。
 - 官方登录成功后返回阅读器；可选择在本机加密保存会话。
 - 个别帖子 JSON 数据不完整时，自动追加一次同站静态正文请求，继续原生阅读；不执行正文网页脚本。
 - 侧栏内置离线使用说明；支持 F5 刷新、Ctrl + Shift + Space 隐藏或恢复窗口。
@@ -54,7 +61,7 @@
 
 ## 软件更新
 
-0.1.6及更早版本需要手动下载一次新版；0.1.7若检查更新一直显示HTTP403，也请手动下载一次0.1.11。退出旧版，保留原数据目录。正式便携版启动10秒后检查更新，此后每24小时检查；可在侧栏“软件更新”关闭自动检查，或随时手动检查。检查失败可继续阅读。
+0.1.6及更早版本需要手动下载一次新版；0.1.7若检查更新一直显示HTTP403，也请手动下载一次0.1.12。退出旧版，保留原数据目录。正式便携版启动10秒后检查更新，此后每24小时检查；可在侧栏“软件更新”关闭自动检查，或随时手动检查。检查失败可继续阅读。
 
 0.1.8优先读取公开的签名更新索引，再按需使用GitHub Releases API；API限额时提示重试时间和简洁下载页。索引里的安装元数据仍需通过内置公钥验证，不携带NGA登录数据。
 
@@ -135,7 +142,7 @@ python packaging/package.py --target windows-amd64
 
 官方网页、图床验证及系统代理配置可能引发相应网络请求。本项目遵守论坛登录、权限和频率限制，不提供绕过验证、发帖、投票或批量操作功能。
 
-**杀毒状态：** Windows 0.1.2 构建曾被 360 检出为 `Trojan.Win64.SilverFox.ZAX`。包含 0.1.2 / 0.1.3 样本的复核申请未通过；收到的回复未给出具体检出依据。当前版本为 0.1.11，尚无该版本的 360 放行结论。Windows 程序没有 Authenticode 签名，Mac 只有 ad-hoc 完整性签名，没有 Developer ID 签名或 Apple 公证，系统可能阻止启动。公开源码、功能测试、校验值及依赖漏洞扫描不能替代恶意软件鉴定。详情见 [安全说明](SECURITY.md)。
+**杀毒状态：** Windows 0.1.2 构建曾被 360 检出为 `Trojan.Win64.SilverFox.ZAX`。包含 0.1.2 / 0.1.3 样本的复核申请未通过；收到的回复未给出具体检出依据。当前版本为 0.1.12，尚无该版本的 360 放行结论。Windows 程序没有 Authenticode 签名，Mac 只有 ad-hoc 完整性签名，没有 Developer ID 签名或 Apple 公证，系统可能阻止启动。公开源码、功能测试、校验值及依赖漏洞扫描不能替代恶意软件鉴定。详情见 [安全说明](SECURITY.md)。
 
 ## 开发与验证
 
@@ -149,7 +156,7 @@ Node.js 仅用于可选的登录页脚本测试，构建和运行软件不依赖
 
 当前回归测试覆盖 API / 静态正文解析、分页、会话加密、登录引导、主题保存、图片按需展示和内置帮助。论坛接口不稳定，复杂视频、部分 BBCode 和表情可能降级显示，可打开原帖查看。
 
-0.1.11的原生表情、尺寸与动画验证见[验证记录](docs/validation-0.1.11.md)；0.1.10的板块搜索与验证范围见[验证记录](docs/validation-0.1.10.md)；0.1.9的升级提示修复、独立复核与兼容边界见[验证记录](docs/validation-0.1.9.md)；此前的阅读体验体检见[0.1.8记录](docs/validation-0.1.8.md)。
+0.1.12正式版体验优化、表情复制和发布验证见[验证记录](docs/validation-0.1.12-stable.md)；0.1.11原生表情见[历史验证](docs/validation-0.1.11.md)；0.1.10的板块搜索与验证范围见[验证记录](docs/validation-0.1.10.md)；0.1.9的升级提示修复、独立复核与兼容边界见[验证记录](docs/validation-0.1.9.md)；此前的阅读体验体检见[0.1.8记录](docs/validation-0.1.8.md)。
 
 目录说明：
 

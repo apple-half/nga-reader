@@ -61,7 +61,8 @@ class PublishTests(unittest.TestCase):
             (output / name).write_bytes(data)
             self.assets.append({'name': name, 'state': 'uploaded', 'size': len(data), 'digest': 'sha256:' + hashlib.sha256(data).hexdigest()})
         self.calls = []
-        self.state = {'draft': True, 'prerelease': False}
+        self.state = {'draft': True, 'prerelease': True, 'latest': False}
+        self.missing_at_start = False
         self.verify_error = None
         self.feed_error = None
         self.feed_calls = []
@@ -72,8 +73,19 @@ class PublishTests(unittest.TestCase):
             self.state['draft'] = '--draft=false' not in args
             if '--prerelease' in args:
                 self.state['prerelease'] = True
+            if '--prerelease=false' in args:
+                self.state['prerelease'] = False
+            if '--latest' in args:
+                self.state['latest'] = True
+        if args[:2] == ('release', 'create'):
+            self.state['draft'] = '--draft' in args
+            self.state['prerelease'] = '--prerelease' in args
+            self.state['latest'] = '--latest' in args
 
     def release(self, *args, **kwargs):
+        if self.missing_at_start:
+            self.missing_at_start = False
+            return None
         return {**self.state, 'assets': self.assets, 'html_url': 'https://github.com/example/reader/releases/tag/v' + publish.VERSION}
 
     def feed(self, repo, tag, directory, current, gh):
@@ -86,14 +98,26 @@ class PublishTests(unittest.TestCase):
         with patch.dict(os.environ, {'GITHUB_REPOSITORY': 'example/reader', 'RELEASE_TAG': 'v' + publish.VERSION}), patch.object(publish, 'ROOT', self.root), patch.object(publish, 'check_version'), patch.object(publish, 'checksums'), patch.object(publish, 'verify_updates', side_effect=self.verify_error), patch.object(publish, 'release', side_effect=self.release), patch.object(publish, 'gh', side_effect=self.gh), patch.object(publish, 'publish_feeds', side_effect=self.feed):
             publish.main(stage_only=stage_only, feed_only=feed_only)
 
-    def test_reused_stable_draft_is_made_prerelease_before_exposure(self):
+    def test_prerelease_draft_becomes_stable_latest_after_verification(self):
         self.run_publish()
         edits = [call for call in self.calls if call[:2] == ('release', 'edit')]
         self.assertEqual(len(edits), 1)
         self.assertIn('--draft=false', edits[0])
-        self.assertIn('--prerelease', edits[0])
-        self.assertEqual(self.state, {'draft': False, 'prerelease': True})
+        self.assertIn('--prerelease=false', edits[0])
+        self.assertIn('--latest', edits[0])
+        self.assertEqual(self.state, {'draft': False, 'prerelease': False, 'latest': True})
         self.assertEqual(len(self.feed_calls), 1)
+
+    def test_new_stage_is_stable_draft_and_never_latest(self):
+        self.missing_at_start = True
+        self.assets = [a for a in self.assets if a['name'] not in publish.update_asset_names()]
+        self.run_publish(stage_only=True)
+        create = next(c for c in self.calls if c[:2] == ('release', 'create'))
+        self.assertIn('--draft', create)
+        self.assertIn('--prerelease=false', create)
+        self.assertIn('--latest=false', create)
+        self.assertEqual(self.state, {'draft': True, 'prerelease': False, 'latest': False})
+        self.assertEqual(self.feed_calls, [])
 
     def test_wrong_uploaded_digest_leaves_release_as_draft(self):
         self.assets[0]['digest'] = 'sha256:' + '0' * 64
