@@ -207,3 +207,29 @@ func TestContinuousWaitsForScrollAndNeverDropsPartOfPage(t *testing.T) {
 		t.Fatal("part of next page was silently dropped at segment bound")
 	}
 }
+
+func TestContinuousUnknownTotalStopsAndTopTargetsVisiblePage(t *testing.T) {
+	a, tr := continuousReader(t)
+	tr.total = 0
+	a.thread.TotalRows = 0
+	a.thread.PagesKnown = false
+	a.thread.TotalPages = 0
+	a.appendNextPage()
+	if len(a.rendered) != 40 {
+		t.Fatal("unknown total cannot continue")
+	}
+	a.thread.TotalRows = 0
+	a.thread.PagesKnown = false
+	a.thread.TotalPages = 0
+	tr.empty = true
+	a.appendNextPage()
+	if !a.continuation.Ended {
+		t.Fatal("unknown total empty page did not stop")
+	}
+	a.reading.VisiblePage = 2
+	a.scroll.Y = 1000
+	a.readingToTop()
+	if a.reading.Pending == nil || a.reading.Pending.Page != 2 || a.reading.Pending.Position.Floor != 20 {
+		t.Fatal("top went to another loaded page")
+	}
+}

@@ -12,12 +12,13 @@ import (
 func dialog(c *ui.Context, open *bool, title string, body func()) {
 	ui.DialogBase(c.Key(title), open, func(backdrop, panel ui.Element) {
 		backdrop.Background(ui.RGBA(0, 0, 0, .45))
-		panel.Width(470).MaxWidthPercent(92).Padding(23).Radius(12).Gap(17).Background(c.Theme().Background).Border(1, c.Theme().Border)
+		panel.Width(470).MaxWidthPercent(92).MaxHeightPercent(92).Padding(23).Radius(12).Gap(17).Background(c.Theme().Background).Border(1, c.Theme().Border)
 		ui.Row(c).Gap(10).Children(func() {
 			ui.Text(c, title).FontSize(18).FontWeight(500).Grow(1)
 			ui.Button(c, "关闭").FontSize(11).Padding(4, 7).OnClick(func() { *open = false })
 		})
-		body()
+		_, height := c.Size()
+		ui.Scroll(c.Key("dialog-content")).MaxHeight(max(180, height*.92-110)).FillWidth().Gap(17).Children(body)
 	})
 }
 func (a *reader) dialogs(c *ui.Context, p palette) {
@@ -51,7 +52,7 @@ func (a *reader) dialogs(c *ui.Context, p palette) {
 			}
 		})
 		ui.Divider(c)
-		ui.Text(c, "快捷键  Ctrl + Shift + Space  隐藏 / 恢复\n窗口关闭即退出，托盘菜单也可退出。").FontSize(12).LineHeight(1.7).TextColor(c.Theme().TextMuted)
+		ui.Text(c, "Ctrl/Cmd + F 查找正文 · Alt + ← / → 阅读后退、前进\nF5 刷新 · Ctrl/Cmd + L 打开链接\nCtrl + Shift + Space 隐藏 / 恢复 · 关闭窗口即退出").FontSize(12).LineHeight(1.7).TextColor(c.Theme().TextMuted)
 		ui.Row(c).Gap(8).Children(func() {
 			ui.Button(c, "打开数据目录").OnClick(func() {
 				if a.win != nil {
@@ -141,7 +142,7 @@ func (a *reader) signOut() {
 }
 func (a *reader) openOriginal() {
 	if a.win != nil && a.selected.ID > 0 && !a.demo {
-		if err := mygo.Shell.OpenExternal(fmt.Sprintf("https://bbs.nga.cn/read.php?tid=%d&page=%d", a.selected.ID, max(1, a.thread.Page))); err != nil {
+		if err := mygo.Shell.OpenExternal(fmt.Sprintf("https://bbs.nga.cn/read.php?tid=%d&page=%d", a.selected.ID, a.visibleThreadPage())); err != nil {
 			a.notify("无法打开原帖")
 		}
 	}

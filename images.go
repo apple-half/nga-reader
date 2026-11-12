@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"math"
 	"net/url"
 	"strings"
 
@@ -49,12 +51,75 @@ func (a *reader) openPicture(address string) {
 		a.notify("图片地址暂不支持")
 		return
 	}
+	a.pictureItems, a.pictureIndex = a.imageGallery(safe)
+	a.pictureZoom = 1
+	a.showPicture(safe)
+}
+
+// Building the address list does not fetch any image or create a WebView.
+func (a *reader) imageGallery(address string) ([]string, int) {
+	clicked, err := nga.ImageURL(address)
+	if err != nil {
+		return nil, -1
+	}
+	var items []string
+	seen := map[string]bool{}
+	for _, r := range a.rendered {
+		d := parser.Parse(r.source)
+		for i := 1; i < d.Len(); i++ {
+			for _, n := range d.Inlines(i) {
+				if n.Kind != parser.Link {
+					continue
+				}
+				safe, err := nga.ImageURL(n.Dest)
+				if err == nil && !seen[safe] && len(items) < 500 {
+					items = append(items, safe)
+					seen[safe] = true
+				}
+			}
+		}
+	}
+	for i, item := range items {
+		if item == clicked {
+			return items, i
+		}
+	}
+	items = append([]string{clicked}, items...)
+	if len(items) > 500 {
+		items = items[:500]
+	}
+	return items, 0
+}
+func (a *reader) navigatePicture(delta int) {
+	i := a.pictureIndex + delta
+	if i < 0 || i >= len(a.pictureItems) {
+		return
+	}
+	safe, err := nga.ImageURL(a.pictureItems[i])
+	if err != nil {
+		return
+	}
+	a.pictureIndex = i
+	a.pictureZoom = 1
+	a.showPicture(safe)
+}
+func (a *reader) setPictureZoom(factor float64) {
+	if math.IsNaN(factor) || math.IsInf(factor, 0) {
+		factor = 1
+	}
+	a.pictureZoom = min(4, max(.25, factor))
+	if a.pictureWeb != nil && !a.pictureWeb.IsDestroyed() {
+		a.pictureWeb.Page().SetZoomFactor(a.pictureZoom)
+	}
+}
+func (a *reader) showPicture(safe string) {
 	a.pictureAddress, a.pictureError = safe, ""
 	if a.win == nil || a.win.IsDestroyed() {
 		return
 	}
 	if a.pictureWindow != nil && !a.pictureWindow.IsDestroyed() {
 		if a.pictureWeb != nil && !a.pictureWeb.IsDestroyed() {
+			a.pictureWeb.Page().SetZoomFactor(a.pictureZoom)
 			_ = a.pictureWeb.Page().LoadURL(safe)
 		}
 		a.pictureWindow.Show()
@@ -68,6 +133,9 @@ func (a *reader) openPicture(address string) {
 		if a.pictureWindow == window {
 			a.pictureWindow, a.pictureWeb = nil, nil
 			a.pictureAddress, a.pictureError = "", ""
+			a.pictureItems = nil
+			a.pictureIndex = 0
+			a.pictureZoom = 1
 		}
 	})
 	if !webviewAvailable() {
@@ -75,7 +143,7 @@ func (a *reader) openPicture(address string) {
 		window.Invalidate()
 		return
 	}
-	web, err := window.NewWebView(mygo.WebViewOptions{Page: mygo.PageOptions{Session: mygo.NewEphemeralSession(), Untrusted: true, DevTools: mygo.DevToolsDisabled, PinchZoom: true}})
+	web, err := window.NewWebView(mygo.WebViewOptions{Page: mygo.PageOptions{Session: mygo.NewEphemeralSession(), Untrusted: true, DevTools: mygo.DevToolsDisabled, PinchZoom: true, ZoomFactor: a.pictureZoom}})
 	if err != nil {
 		a.pictureError = "无法打开图片预览，请关闭后重新点击“展示图片”，或使用“浏览器打开”。"
 		window.Invalidate()
@@ -110,10 +178,25 @@ func pictureNavigationAllowed(address string) bool {
 
 func (a *reader) pictureView(c *ui.Context) {
 	a.theme(c)
+	if c.Shortcut(0, ui.KeyLeft) {
+		a.navigatePicture(-1)
+	}
+	if c.Shortcut(0, ui.KeyRight) {
+		a.navigatePicture(1)
+	}
 	ui.Column(c).Fill().AlignItems(ui.Stretch).Background(c.Theme().Background).Children(func() {
 		ui.Column(c).Padding(12, 16).Gap(5).Children(func() {
-			ui.Text(c, "图片预览").FontSize(16).FontWeight(500)
+			ui.Textf(c, "图片预览 · %d / %d", a.pictureIndex+1, max(1, len(a.pictureItems))).FontSize(16).FontWeight(500)
 			ui.Text(c, "如出现 NGA 图床验证，请在此窗口完成。关闭窗口后返回阅读。").FontSize(12).TextColor(c.Theme().TextMuted)
+			ui.Row(c).Gap(6).Wrap().Children(func() {
+				ui.Button(c, "上一张").Disabled(a.pictureIndex <= 0).OnClick(func() { a.navigatePicture(-1) })
+				ui.Button(c, "下一张").Disabled(a.pictureIndex+1 >= len(a.pictureItems)).OnClick(func() { a.navigatePicture(1) })
+				ui.Spacer(c).Grow(1)
+				ui.Button(c, "−").Label("缩小图片").Disabled(a.pictureZoom <= .25).OnClick(func() { a.setPictureZoom(a.pictureZoom / 1.25) })
+				ui.Text(c, fmt.Sprintf("%.0f%%", 100*a.pictureZoom)).FontSize(12)
+				ui.Button(c, "＋").Label("放大图片").Disabled(a.pictureZoom >= 4).OnClick(func() { a.setPictureZoom(a.pictureZoom * 1.25) })
+				ui.Button(c, "重置").Label("重置图片缩放").OnClick(func() { a.setPictureZoom(1) })
+			})
 		})
 		ui.Divider(c)
 		if a.pictureWeb != nil && !a.pictureWeb.IsDestroyed() {

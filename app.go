@@ -44,6 +44,9 @@ type reader struct {
 	pictureWindow                                 *mygo.Window
 	pictureWeb                                    *mygo.WebView
 	pictureAddress, pictureError                  string
+	pictureItems                                  []string
+	pictureIndex                                  int
+	pictureZoom                                   float64
 	demo, closing, focused, onlyAuthor            bool
 	mode, filter                                  string
 	hot                                           bool

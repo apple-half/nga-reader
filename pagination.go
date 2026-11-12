@@ -140,7 +140,20 @@ func (a *reader) toggleAuthorFilter() {
 		a.loadThread(1)
 	}
 }
-func (a *reader) readingToTop() { a.reading.Pending = nil; a.reading.Settling = 2; a.scroll.Y = 0 }
+func (a *reader) readingToTop() {
+	page := a.visibleThreadPage()
+	if page != max(1, a.thread.Page) {
+		for _, r := range a.rendered {
+			if r.page == page {
+				a.reading.Pending = &readingRestore{TopicID: a.selected.ID, UID: a.readingUID(), Page: page, Position: local.ReadingPosition{PID: r.post.ID, Floor: r.post.Floor}, Quiet: true}
+				return
+			}
+		}
+	}
+	a.reading.Pending = nil
+	a.reading.Settling = 2
+	a.scroll.Y = 0
+}
 func (a *reader) modalOpen() bool {
 	return a.settingsOpen || a.addOpen || a.linkOpen || a.cookieOpen || a.helpOpen || a.compose.Open || a.updates.Open || a.jump.Open || a.manager.Open
 }
