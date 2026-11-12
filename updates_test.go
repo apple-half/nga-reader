@@ -41,7 +41,7 @@ func updateTestReader(t *testing.T) (*reader, *fakeUpdateEngine, *fakeUpdateOffe
 	t.Helper()
 	a := newReader(t.TempDir())
 	t.Cleanup(a.cancel)
-	offer := &fakeUpdateOffer{info: updateInfo{Version: "0.1.8", Notes: "更新说明：改进阅读体验。", Installable: true, Prerelease: true}}
+	offer := &fakeUpdateOffer{info: updateInfo{Version: "0.2.0", Notes: "更新说明：改进阅读体验。", Installable: true, Prerelease: true}}
 	engine := &fakeUpdateEngine{offer: offer}
 	a.updaterEngine = engine
 	a.runUpdateTask = func(fn func()) { fn() }

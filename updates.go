@@ -37,6 +37,7 @@ type updateState struct {
 	Offer                                      updateOffer
 	Error, Message                             string
 	Downloaded, Total                          int64
+	notes                                      updateNotesCache
 }
 type nativeUpdateEngine struct{ client *appupdate.Client }
 type nativeUpdateOffer struct {
