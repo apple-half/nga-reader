@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 	"unicode/utf8"
+
+	"ngareader/internal/emotes"
 )
 
 var bbTag = regexp.MustCompile(`(?i)^(/?)([a-z*]+)(?:[= :](.*))?$`)
@@ -75,8 +77,14 @@ func renderMarkdown(source string, textOnly, onDemand bool) string {
 				continue
 			}
 			index += close + 1
-			if name == "s" && strings.Contains(arg, ":") {
-				b.WriteString("[表情]")
+			if name == "s" && strings.HasPrefix(strings.ToLower(inner), "s:") {
+				if emote, ok := emotes.Lookup(arg); ok {
+					b.WriteString(emoteMarkdown(emote, textOnly))
+				} else {
+					// Unknown standalone emotes must never consume the rest of a
+					// post as a paired [s] strikethrough tag.
+					b.WriteString(literal)
+				}
 				continue
 			}
 			if name == "*" {
@@ -145,7 +153,9 @@ func renderMarkdown(source string, textOnly, onDemand bool) string {
 					b.WriteString(content)
 				}
 			case "img":
-				if address, err := ImageURL(content); err == nil && !textOnly {
+				if emote, ok := emotes.FromOfficialURL(strings.TrimSpace(content)); ok {
+					b.WriteString(emoteMarkdown(emote, textOnly))
+				} else if address, err := ImageURL(content); err == nil && !textOnly {
 					if onDemand {
 						b.WriteString("\n\n[展示图片](<" + address + ">)\n\n")
 					} else {
@@ -170,6 +180,13 @@ func renderMarkdown(source string, textOnly, onDemand bool) string {
 		return b.String()
 	}
 	return strings.TrimSpace(parse(""))
+}
+
+func emoteMarkdown(emote emotes.Emote, textOnly bool) string {
+	if textOnly {
+		return "[表情：" + emote.Label() + "]"
+	}
+	return "[](<" + emotes.Destination(emote) + "> \"NGA 表情：" + strings.ReplaceAll(emote.Label(), "\"", "\\\"") + "\")"
 }
 
 func longestRun(s string, character byte) int {

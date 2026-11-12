@@ -12,6 +12,8 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"ngareader/internal/emotes"
+
 	"golang.org/x/net/html"
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
@@ -286,7 +288,9 @@ func postText(n *html.Node) string {
 				b.WriteByte('\n')
 				return
 			case "img":
-				if address, e := ImageURL(nodeAttr(p, "src")); e == nil {
+				if emote, ok := emotes.FromOfficialURL(nodeAttr(p, "src")); ok {
+					b.WriteString("[s:" + emote.Group + ":" + emote.Name + "]")
+				} else if address, e := ImageURL(nodeAttr(p, "src")); e == nil {
 					b.WriteString("[img]" + address + "[/img]")
 				}
 				return
