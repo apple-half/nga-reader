@@ -13,11 +13,12 @@ import (
 
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
+	"ngareader/internal/emotes"
 	"ngareader/internal/local"
 	"ngareader/internal/nga"
 )
 
-const appVersion = "0.1.10"
+const appVersion = "0.1.11"
 
 func main() {
 	licenses := flag.Bool("licenses", false, "输出程序内嵌的第三方许可后退出")
@@ -26,7 +27,7 @@ func main() {
 	directory := flag.String("data-dir", "", "指定本地数据目录（默认 EXE 同级 data）")
 	flag.Parse()
 	if *licenses {
-		fmt.Print(thirdPartyNotices)
+		fmt.Print(thirdPartyNotices, "\n\n", emotes.Notice())
 		return
 	}
 	exe, err := os.Executable()

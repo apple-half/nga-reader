@@ -103,6 +103,7 @@ func FromOfficialURL(address string) (Emote, bool) {
 }
 
 func Info(file string) (AssetInfo, bool) { info, ok := infos[file]; return info, ok }
+func Notice() string                     { raw, _ := files.ReadFile("NOTICE.txt"); return string(raw) }
 func Asset(file string) (AssetInfo, []byte, bool) {
 	info, ok := infos[file]
 	if !ok {
