@@ -36,7 +36,7 @@ func (s *continuousTransport) RoundTrip(r *http.Request) (*http.Response, error)
 			posts = append(posts, fmt.Sprintf(`{"pid":%d,"lou":%d,"authorid":2,"content":"第%d楼 %s"}`, 100+f, f, f, strings.Repeat("正文示例。", 35)))
 		}
 	}
-	body := fmt.Sprintf(`{"data":{"__T":{"tid":1001,"fid":-7,"subject":"连续阅读","replies":%d},"__R":[%s],"__R__ROWS":%d,"__R__ROWS_PAGE":20}}`, max(0, s.total-1), strings.Join(posts, ","), s.total)
+	body := fmt.Sprintf(`{"data":{"__T":{"tid":%s,"fid":-7,"subject":"连续阅读","replies":%d},"__R":[%s],"__R__ROWS":%d,"__R__ROWS_PAGE":20}}`, r.URL.Query().Get("tid"), max(0, s.total-1), strings.Join(posts, ","), s.total)
 	return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": []string{"application/json"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
 }
 func continuousReader(t *testing.T) (*reader, *continuousTransport) {

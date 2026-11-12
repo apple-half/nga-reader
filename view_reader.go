@@ -144,6 +144,9 @@ func (a *reader) emptyReader(c *ui.Context, p palette) {
 		}
 		ui.Text(c, heading).FontSize(20).FontWeight(500)
 		ui.Text(c, description).FontSize(13).TextColor(c.Theme().TextMuted).MaxWidth(440).TextAlign(ui.Center)
+		if r, ok := a.lastReading(); ok && !a.demo {
+			ui.Button(c, "继续上次阅读").Tooltip(r.Topic.Title).OnClick(a.continueLastReading)
+		}
 		ui.Row(c).Gap(9).Margin(9, 0, 0, 0).Children(func() {
 			if !a.client.HasSession() {
 				ui.PrimaryButton(c, "登录 NGA").OnClick(a.openLogin)

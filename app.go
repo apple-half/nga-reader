@@ -76,6 +76,7 @@ type reader struct {
 	listState                                     ui.ListState
 	scroll                                        ui.ScrollState
 	reading                                       readingViewState
+	navigation                                    readingNavigation
 	continuation                                  continuationState
 	refreshingThread                              bool
 	refreshError                                  error

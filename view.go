@@ -94,7 +94,16 @@ func navButton(c *ui.Context, key, icon, label, count string, selected bool, p p
 	}).OnClick(fn)
 }
 func (a *reader) view(c *ui.Context) {
+	a.ensureNavigationAccount()
 	p := a.theme(c)
+	if !a.modalOpen() && !a.navigationBusy() {
+		if c.Shortcut(ui.Alt, ui.KeyLeft) {
+			a.navigateHistory(-1)
+		}
+		if c.Shortcut(ui.Alt, ui.KeyRight) {
+			a.navigateHistory(1)
+		}
+	}
 	if !a.modalOpen() && !a.navigationBusy() && c.Shortcut(ui.Cmd, ui.KeyL) {
 		a.openLinkDialog()
 	}
@@ -148,6 +157,8 @@ func (a *reader) titlebar(c *ui.Context, p palette) {
 			label = "展开板块栏"
 		}
 		iconButton(c, "toggle-sidebar", "topics", label, false).OnClick(func() { a.state.SidebarHidden = !a.state.SidebarHidden; a.focused = false; a.save() })
+		iconButton(c, "reading-back", "left", "阅读后退", len(a.navigation.Back) == 0 || a.loadingThread).OnClick(func() { a.navigateHistory(-1) })
+		iconButton(c, "reading-forward", "right", "阅读前进", len(a.navigation.Forward) == 0 || a.loadingThread).OnClick(func() { a.navigateHistory(1) })
 		ui.Text(c, "工作台").FontWeight(500)
 		ui.Text(c, "/ NGA Reader").FontSize(12).TextColor(c.Theme().TextMuted)
 		ui.Spacer(c).Grow(1)

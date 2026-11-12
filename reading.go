@@ -29,6 +29,7 @@ type readingViewState struct {
 	Dirty                      bool
 	SaveAt                     time.Time
 	VisiblePage                int
+	Anchor                     *local.ReadingPosition
 }
 
 func (a *reader) readTask(fn func()) {
@@ -39,6 +40,7 @@ func (a *reader) readTask(fn func()) {
 	}
 }
 func (a *reader) resetReadingSession() {
+	a.navigation = readingNavigation{}
 	a.flushReadingProgress()
 	a.topicGate.Begin(a.ctx)
 	a.threadGate.Begin(a.ctx)
@@ -133,15 +135,6 @@ func (a *reader) observeReadingView(c *ui.Context, viewport ui.Rect, rows []read
 	if a.loadingThread && !a.refreshingThread || a.threadErr != nil || a.thread.Topic.ID != a.selected.ID || len(rows) == 0 {
 		return
 	}
-	if a.onlyAuthor {
-		for _, row := range rows {
-			if row.Bounds.H > 0 && row.Bounds.Y+row.Bounds.H > viewport.Y+2 && row.Bounds.Y < viewport.Y+viewport.H {
-				s.VisiblePage = max(1, row.Page, a.thread.Page)
-				break
-			}
-		}
-		return
-	}
 	uid := a.readingUID()
 	if viewport.H <= 0 {
 		if s.Warm < 2 {
@@ -153,9 +146,13 @@ func (a *reader) observeReadingView(c *ui.Context, viewport ui.Rect, rows []read
 	samePage := s.TopicID == a.selected.ID && s.UID == uid && s.Page == a.thread.Page
 	geometryChanged := samePage && s.Font > 0 && s.Width > 0 && (s.Font != a.state.FontSize || s.Width != viewport.W)
 	if geometryChanged && s.Pending == nil {
+		if a.onlyAuthor && s.Anchor != nil {
+			s.Pending = &readingRestore{TopicID: a.selected.ID, UID: uid, Page: max(1, s.VisiblePage), Position: *s.Anchor, Quiet: true}
+			s.Warm = 0
+		}
 		// Native TrackScroll retains pixels through reflow. Preserve the last
 		// visible post instead, and restore it once after committed layout.
-		if r, ok := local.FindReading(a.state.History, a.selected.ID, uid); ok && a.hasLoadedPage(r.Page) && r.Position != nil {
+		if r, ok := local.FindReading(a.state.History, a.selected.ID, uid); !a.onlyAuthor && ok && a.hasLoadedPage(r.Page) && r.Position != nil {
 			s.Pending = &readingRestore{TopicID: a.selected.ID, UID: uid, Page: r.Page, Position: *r.Position, Quiet: true}
 			s.Warm = 0
 		}
@@ -213,10 +210,6 @@ func (a *reader) observeReadingView(c *ui.Context, viewport ui.Rect, rows []read
 		c.Invalidate()
 		return
 	}
-	r, ok := local.FindReading(a.state.History, a.selected.ID, uid)
-	if !ok || !r.Scoped || r.UID != uid {
-		return
-	}
 	var position *local.ReadingPosition
 	page := max(1, a.thread.Page)
 	if a.scroll.Y > 1 {
@@ -234,6 +227,14 @@ func (a *reader) observeReadingView(c *ui.Context, viewport ui.Rect, rows []read
 		}
 	}
 	s.VisiblePage = page
+	s.Anchor = clonePosition(position)
+	if a.onlyAuthor {
+		return
+	}
+	r, ok := local.FindReading(a.state.History, a.selected.ID, uid)
+	if !ok || !r.Scoped || r.UID != uid {
+		return
+	}
 	if r.Page != page || !sameReadingPosition(r.Position, position) {
 		r.Page = page
 		r.Position = position

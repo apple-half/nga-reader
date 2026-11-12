@@ -15,6 +15,7 @@ import (
 )
 
 func (a *reader) selectBoard(board local.Board) {
+	a.recordNavigation()
 	a.flushReadingProgress()
 	a.reading = readingViewState{}
 	a.linkLastTopic = 0
@@ -80,6 +81,9 @@ func (a *reader) selectTopic(t nga.Topic) {
 	a.selectTopicPage(t, 0)
 }
 func (a *reader) selectTopicPage(t nga.Topic, page int) {
+	if a.selected.ID != t.ID || page != 0 && page != a.visibleThreadPage() {
+		a.recordNavigation()
+	}
 	a.linkLastTopic = 0
 	if page == 0 {
 		page = a.beginReadingTopic(t.ID)
@@ -290,6 +294,7 @@ func (a *reader) returnToLive() {
 		return
 	}
 	a.resetBoardPicker()
+	a.navigation = readingNavigation{}
 	if a.liveState != nil {
 		a.state = *a.liveState
 		a.liveState = nil
