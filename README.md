@@ -12,15 +12,15 @@
 
 **[打开简洁下载页 → Windows / Mac 免安装版](DOWNLOAD.md)**
 
-当前版本：0.1.13 正式版 · 免安装便携版。按系统选择下方 ZIP 即可：
+当前版本：0.1.14 正式版 · 免安装便携版。按系统选择下方 ZIP 即可：
 
-主分支源码已新增可选图标：在“阅读设置 → 应用图标”切换简约工作与工位摸鱼，并记住选择。此功能尚未包含在下方0.1.13下载包中，见[图标设计](docs/logo-design.md)及[验证记录](docs/validation-selectable-icon.md)。
+本版新增可选图标：在“阅读设置 → 应用图标”切换简约工作与工位摸鱼，并记住选择。见[图标设计](docs/logo-design.md)及[功能验证](docs/validation-selectable-icon.md)。
 
 | 系统 | 下载 | 使用方法 |
 | --- | --- | --- |
-| Windows x64 | [Windows 便携 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.13/NGAReader-0.1.13-Windows-x64-portable.zip) | 解压整个文件夹，双击 `NGAReader.exe` |
-| Mac Apple 芯片（M 系列） | [Apple 芯片 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.13/NGAReader-0.1.13-macOS-AppleSilicon-portable.zip) | 解压后打开 `NGAReader.app` |
-| Mac Intel | [Intel ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.13/NGAReader-0.1.13-macOS-Intel-portable.zip) | 解压后打开 `NGAReader.app` |
+| Windows x64 | [Windows 便携 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.14/NGAReader-0.1.14-Windows-x64-portable.zip) | 解压整个文件夹，双击 `NGAReader.exe` |
+| Mac Apple 芯片（M 系列） | [Apple 芯片 ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.14/NGAReader-0.1.14-macOS-AppleSilicon-portable.zip) | 解压后打开 `NGAReader.app` |
+| Mac Intel | [Intel ZIP](https://github.com/apple-half/nga-reader/releases/download/v0.1.14/NGAReader-0.1.14-macOS-Intel-portable.zip) | 解压后打开 `NGAReader.app` |
 
 无需安装向导或管理员权限。Mac 最低 macOS 12，不强制复制到 Applications。可用 Release 的 `SHA256SUMS.txt` 核对下载内容。程序没有商业代码签名或 Apple 公证，且尚无本版的 360 放行结论，详见下方安全说明。
 
@@ -63,7 +63,7 @@
 
 ## 软件更新
 
-0.1.6及更早版本需要手动下载一次新版；0.1.7若检查更新一直显示HTTP403，也请手动下载一次0.1.13。退出旧版，保留原数据目录。正式便携版启动10秒后检查更新，此后每24小时检查；可在侧栏“软件更新”关闭自动检查，或随时手动检查。检查失败可继续阅读。
+0.1.6及更早版本需要手动下载一次新版；0.1.7若检查更新一直显示HTTP403，也请手动下载一次0.1.14。退出旧版，保留原数据目录。正式便携版启动10秒后检查更新，此后每24小时检查；可在侧栏“软件更新”关闭自动检查，或随时手动检查。检查失败可继续阅读。
 
 0.1.8优先读取公开的签名更新索引，再按需使用GitHub Releases API；API限额时提示重试时间和简洁下载页。索引里的安装元数据仍需通过内置公钥验证，不携带NGA登录数据。
 
@@ -144,7 +144,7 @@ python packaging/package.py --target windows-amd64
 
 官方网页、图床验证及系统代理配置可能引发相应网络请求。本项目遵守论坛登录、权限和频率限制，不提供绕过验证、发帖、投票或批量操作功能。
 
-**杀毒状态：** Windows 0.1.2 构建曾被 360 检出为 `Trojan.Win64.SilverFox.ZAX`。包含 0.1.2 / 0.1.3 样本的复核申请未通过；收到的回复未给出具体检出依据。当前版本为 0.1.13，尚无该版本的 360 放行结论。Windows 程序没有 Authenticode 签名，Mac 只有 ad-hoc 完整性签名，没有 Developer ID 签名或 Apple 公证，系统可能阻止启动。公开源码、功能测试、校验值及依赖漏洞扫描不能替代恶意软件鉴定。详情见 [安全说明](SECURITY.md)。
+**杀毒状态：** Windows 0.1.2 构建曾被 360 检出为 `Trojan.Win64.SilverFox.ZAX`。包含 0.1.2 / 0.1.3 样本的复核申请未通过；收到的回复未给出具体检出依据。当前版本为 0.1.14，尚无该版本的 360 放行结论。Windows 程序没有 Authenticode 签名，Mac 只有 ad-hoc 完整性签名，没有 Developer ID 签名或 Apple 公证，系统可能阻止启动。公开源码、功能测试、校验值及依赖漏洞扫描不能替代恶意软件鉴定。详情见 [安全说明](SECURITY.md)。
 
 ## 开发与验证
 
@@ -158,7 +158,7 @@ Node.js 仅用于可选的登录页脚本测试，构建和运行软件不依赖
 
 当前回归测试覆盖 API / 静态正文解析、分页、会话加密、登录引导、主题保存、图片按需展示和内置帮助。论坛接口不稳定，复杂视频、部分 BBCode 和表情可能降级显示，可打开原帖查看。
 
-0.1.13正式版体验优化、表情复制和发布验证见[验证记录](docs/validation-0.1.13.md)；0.1.11原生表情见[历史验证](docs/validation-0.1.11.md)；0.1.10的板块搜索与验证范围见[验证记录](docs/validation-0.1.10.md)；0.1.9的升级提示修复、独立复核与兼容边界见[验证记录](docs/validation-0.1.9.md)；此前的阅读体验体检见[0.1.8记录](docs/validation-0.1.8.md)。
+0.1.14可选图标及发布验证见[验证记录](docs/validation-0.1.14.md)；0.1.13正式版体验优化、表情复制和发布验证见[验证记录](docs/validation-0.1.13.md)；0.1.11原生表情见[历史验证](docs/validation-0.1.11.md)；0.1.10的板块搜索与验证范围见[验证记录](docs/validation-0.1.10.md)；0.1.9的升级提示修复、独立复核与兼容边界见[验证记录](docs/validation-0.1.9.md)；此前的阅读体验体检见[0.1.8记录](docs/validation-0.1.8.md)。
 
 目录说明：
 
