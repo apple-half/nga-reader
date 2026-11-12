@@ -137,7 +137,17 @@ func ParseBoardDirectory(raw []byte) ([]DirectoryEntry, error) {
 				walk(v, category, depth+1)
 			}
 		case map[string]any:
-			fid, cid := directoryNumber(node["fid"]), directoryNumber(node["stid"])
+			fid, fidOK := directoryNumber(node["fid"])
+			cid, cidOK := directoryNumber(node["stid"])
+			_, hasFID := node["fid"]
+			_, hasCID := node["stid"]
+			// An absent stid (or explicit integer zero) denotes an ordinary
+			// board. A malformed identity is never that sentinel: reject the
+			// entire refresh rather than turn a collection into its parent.
+			if hasFID && !fidOK || hasCID && (!cidOK || cid < 0) || hasFID && fid == 0 && cid == 0 {
+				valid = false
+				return
+			}
 			name := directoryText(node["name"], 120)
 			if name != "" && (fid != 0 || cid > 0) {
 				entry := DirectoryEntry{ID: fid, CollectionID: cid, Name: name, Description: directoryText(node["info"], 240), Category: category}
@@ -196,7 +206,7 @@ func ParseBoardDirectory(raw []byte) ([]DirectoryEntry, error) {
 	return entries, nil
 }
 
-func directoryNumber(value any) int64 {
+func directoryNumber(value any) (int64, bool) {
 	var text string
 	switch v := value.(type) {
 	case json.Number:
@@ -204,8 +214,8 @@ func directoryNumber(value any) int64 {
 	case string:
 		text = v
 	}
-	n, _ := strconv.ParseInt(text, 10, 64)
-	return n
+	n, err := strconv.ParseInt(text, 10, 64)
+	return n, err == nil
 }
 func directoryText(value any, limit int) string {
 	s, _ := value.(string)

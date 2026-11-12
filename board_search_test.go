@@ -192,6 +192,38 @@ func TestBoardSearchRefreshIsOncePerOpenNotPerKeystrokeAndCaches(t *testing.T) {
 	}
 }
 
+func TestBoardSearchMalformedCollectionRefreshPreservesCatalogAndCache(t *testing.T) {
+	a := boardPickerReader(t)
+	if err := local.SaveBoardDirectoryCache(a.dir, []byte(tinyDirectory), time.Now()); err != nil {
+		t.Fatal(err)
+	}
+	a.openBoardPicker()
+	priorIndex := a.picker.index
+	path := filepath.Join(a.dir, "board-directory.json")
+	before, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.runDirectoryTask = func(fn func()) { fn() }
+	a.client = nga.NewClient(&http.Client{Transport: boardDirectoryTransport(func(r *http.Request) (*http.Response, error) {
+		bad := `{"data":{"0":{"all":{"other":{"content":[{"fid":-7,"stid":"broken","name":"考研讨论"}]}}}}}`
+		return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(bad)), Request: r}, nil
+	})})
+	a.refreshBoardDirectory()
+	after, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if a.picker.Error == "" || a.picker.index != priorIndex || string(before) != string(after) {
+		t.Fatal("invalid refresh replaced valid catalog/cache")
+	}
+	a.picker.Query = "数码"
+	got := a.boardSearchResults()
+	if len(got) != 1 || got[0].ID != 436 || got[0].CollectionID != 0 {
+		t.Fatal("prior local search lost", got)
+	}
+}
+
 func TestBoardSearchFailureAndDemoCannotReplaceLiveStateOrWriteCache(t *testing.T) {
 	a := boardPickerReader(t)
 	var pending []func()

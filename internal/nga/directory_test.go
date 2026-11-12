@@ -2,6 +2,7 @@ package nga
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -11,6 +12,21 @@ import (
 )
 
 const directoryFixture = `window.script_muti_get_var_store={"data":{"0":{"all":{"other":{"name":"网事杂谈","content":{"0":{"content":{"0":{"fid":-7,"name":"网事杂谈","nameS":"水区"},"1":{"fid":-343809,"name":"寂寞的车","info":"车迷俱乐部"},"2":{"fid":436,"name":"消费电子 IT新闻"},"3":{"fid":-7,"stid":39827852,"name":"考研讨论"}}}}},"new":{"name":"最近新增","content":[{"fid":436,"name":"数码板块"}]},"fast":{"name":"收藏版面","content":[{"fid":999,"name":"私人收藏占位"}]}}}}};`
+
+func TestBoardDirectoryRejectsMalformedIdentities(t *testing.T) {
+	for _, identity := range []string{
+		`"fid":-7,"stid":"broken"`, `"fid":-7,"stid":null`, `"fid":-7,"stid":39827852.0`,
+		`"fid":-7,"stid":true`, `"fid":-7,"stid":-1`, `"fid":-7,"stid":9223372036854775808`,
+		`"fid":"broken"`, `"fid":null`, `"fid":true`, `"fid":9223372036854775808`, `"fid":-9223372036854775809`, `"fid":436.0`,
+	} {
+		t.Run(identity, func(t *testing.T) {
+			raw := fmt.Sprintf(`{"data":{"0":{"all":{"other":{"content":[{"fid":436,"name":"消费电子"},{%s,"name":"不能变成父板块"}]}}}}}`, identity)
+			if entries, err := ParseBoardDirectory([]byte(raw)); err == nil {
+				t.Fatalf("malformed identity replaced catalog: %+v", entries)
+			}
+		})
+	}
+}
 
 func TestBoardDirectoryDecodesPublicScriptAndSeparatesCollections(t *testing.T) {
 	gbk, err := simplifiedchinese.GB18030.NewEncoder().Bytes([]byte(directoryFixture))
