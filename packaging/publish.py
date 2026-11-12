@@ -33,6 +33,12 @@ def release(repo, tag, missing_ok=False):
 
 def verify_updates(directory):
     subprocess.run(['go', 'run', './cmd/update-release', 'verify', '--dir', str(directory), '--version', VERSION, '--key', str(ROOT / 'resources' / 'update-public.txt')], cwd=ROOT, check=True, capture_output=True, text=True)
+    notes = (ROOT / 'packaging' / 'update-notes.txt').read_text(encoding='utf-8')
+    for target in TARGETS:
+        name = 'update-' + target + '.json'
+        manifest = json.loads((directory / name).read_text(encoding='utf-8'))
+        if manifest.get('notes', '').replace('\r\n', '\n') != notes:
+            raise RuntimeError('Signed metadata must use compact App update notes: ' + name)
 
 
 def main(stage_only=False, feed_only=False):

@@ -6,7 +6,7 @@ on:
       tag:
         description: 'Existing version tag to build'
         required: true
-        default: 'v0.1.8'
+        default: 'v0.1.9'
         type: string
       publish_existing:
         description: 'Verify and publish the draft after offline signed update files have been uploaded'

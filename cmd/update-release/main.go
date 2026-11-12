@@ -23,7 +23,7 @@ func main() {
 	dir := f.String("dir", "dist", "directory containing the three native portable ZIPs")
 	version := f.String("version", "", "release version without v")
 	keyPath := f.String("key", "", "private key file for sign; public key file for verify")
-	notesPath := f.String("notes", "packaging/release-notes.md", "release notes file")
+	notesPath := f.String("notes", "packaging/update-notes.txt", "compact in-app update notes file")
 	date := f.String("date", time.Now().UTC().Format(time.RFC3339), "UTC release date")
 	target := f.String("target", "windows-amd64", "platform for check")
 	f.Parse(os.Args[2:])
