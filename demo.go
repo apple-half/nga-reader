@@ -43,6 +43,7 @@ func (a *reader) useDemo() {
 	if !a.allowSessionChange() {
 		return
 	}
+	a.resetBoardPicker()
 	if !a.demo {
 		snapshot := a.state
 		snapshot.Boards = append([]local.Board(nil), a.state.Boards...)

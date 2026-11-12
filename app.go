@@ -66,6 +66,9 @@ type reader struct {
 	drafts                                        []local.Draft
 	draftsError                                   error
 	favoriteGate                                  local.RequestGate
+	directoryGate                                 local.RequestGate
+	picker                                        boardPickerState
+	runDirectoryTask                              func(func())
 	loadingFavorites, importAfterLogin            bool
 	listState                                     ui.ListState
 	scroll                                        ui.ScrollState
@@ -212,6 +215,7 @@ func (a *reader) shutdown() {
 	a.topicGate.Close()
 	a.threadGate.Close()
 	a.favoriteGate.Close()
+	a.directoryGate.Close()
 	a.save()
 	if !a.demo && a.state.RememberLogin && a.keys != nil && a.client.HasSession() {
 		_ = local.SaveSession(a.dir, a.client.Cookies(), a.keys)

@@ -155,7 +155,7 @@ func (a *reader) sidebar(c *ui.Context, p palette) {
 		navButton(c, "nav-updates", "refresh", "软件更新", updateCount, false, p, func() { a.checkUpdates(true) })
 		ui.Row(c).Padding(19, 10, 3, 10).Children(func() {
 			ui.Text(c, "我的板块").FontSize(11).TextColor(c.Theme().TextMuted).Grow(1)
-			iconButton(c, "add-board", "plus", "添加板块", false).OnClick(func() { a.formError = ""; a.addOpen = true })
+			iconButton(c, "add-board", "plus", "添加板块", a.navigationBusy()).OnClick(a.openBoardPicker)
 		})
 		ui.Scroll(c).Grow(1).MinHeight(0).Gap(3).Children(func() {
 			label := "导入收藏板块"

@@ -44,3 +44,11 @@ func TestPublicBoardDirectoryCacheRejectsCorruptionAndBadTime(t *testing.T) {
 		t.Fatalf("missing file: %v", err)
 	}
 }
+
+func TestManualBoardLinkRejectsCollectionParent(t *testing.T) {
+	for _, link := range []string{"https://bbs.nga.cn/thread.php?fid=-7&stid=39827852", "https://ngabbs.com/thread.php?fid=414&stid="} {
+		if board, err := ParseBoard(link); err == nil {
+			t.Fatalf("collection added as parent %+v", board)
+		}
+	}
+}

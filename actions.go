@@ -235,6 +235,9 @@ func (a *reader) openLink(address string) {
 	}
 }
 func (a *reader) addBoard() {
+	if !a.addOpen || a.navigationBusy() {
+		return
+	}
 	board, err := local.ParseBoard(a.boardInput)
 	if err != nil {
 		a.formError = err.Error()
@@ -244,26 +247,13 @@ func (a *reader) addBoard() {
 		board.Name = name
 		board.CustomName = true
 	}
-	exists := false
-	for i, b := range a.state.Boards {
-		if b.ID == board.ID {
-			exists = true
-			a.state.Boards[i] = board
-		}
-	}
-	if !exists {
-		a.state.Boards = append(a.state.Boards, board)
-	}
-	a.addOpen = false
-	a.boardInput = ""
-	a.boardName = ""
-	a.formError = ""
-	a.selectBoard(board)
+	a.persistAddedBoard(board, board.CustomName)
 }
 func (a *reader) returnToLive() {
 	if !a.allowSessionChange() {
 		return
 	}
+	a.resetBoardPicker()
 	if a.liveState != nil {
 		a.state = *a.liveState
 		a.liveState = nil

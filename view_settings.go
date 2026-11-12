@@ -59,15 +59,7 @@ func (a *reader) dialogs(c *ui.Context, p palette) {
 			ui.Button(c, "查看界面演示").OnClick(func() { a.settingsOpen = false; a.useDemo() })
 		})
 	})
-	dialog(c, &a.addOpen, "添加板块", func() {
-		ui.Text(c, "输入板块 ID 或 NGA 官方板块链接。").FontSize(12).TextColor(c.Theme().TextMuted)
-		ui.TextInput(c, &a.boardInput).Label("板块 ID 或链接").Placeholder("例如 -7 或 https://bbs.nga.cn/thread.php?fid=-7").MaxLength(500).AutoFocus()
-		ui.TextInput(c, &a.boardName).Label("板块名称").Placeholder("板块名称（可选）").MaxLength(30)
-		if a.formError != "" {
-			ui.Text(c, a.formError).FontSize(12).TextColor(c.Theme().Danger)
-		}
-		ui.Row(c).Justify(ui.End).Children(func() { ui.PrimaryButton(c, "添加并打开").OnClick(a.addBoard) })
-	})
+	a.boardPickerView(c)
 	dialog(c, &a.linkOpen, "打开帖子链接", func() {
 		input := ui.TextInput(c, &a.linkInput).Label("NGA 帖子链接").Placeholder("https://bbs.nga.cn/read.php?tid=…").MaxLength(1200).AutoFocus()
 		if a.formError != "" {

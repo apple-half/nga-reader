@@ -3,6 +3,7 @@ package local
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -130,6 +131,9 @@ func ParseBoard(value string) (Board, error) {
 	value = strings.TrimSpace(value)
 	id, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
+		if u, e := url.Parse(value); e == nil && u.Query().Has("stid") {
+			return Board{}, fmt.Errorf("这是合集链接，暂不支持添加；请在 NGA 官网查看")
+		}
 		tid, fid, e := nga.ParseLink(value)
 		if e != nil || tid != 0 || fid == 0 {
 			return Board{}, fmt.Errorf("请输入板块数字 ID 或 NGA 板块链接")
