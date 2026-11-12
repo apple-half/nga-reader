@@ -20,7 +20,7 @@ Sole formal checkout; preserve cartoon and all user data; no D drive operations;
 ### Task1: Asset, state and native selector
 **Files:** icons.go, app_icon_test.go, internal/local/state.go/state_test.go, view_settings.go, view.go, view_reader.go, main.go, packaging/icon.png/icon-office.png; docs/logo-design.md and resources/usage.md.
 **Interfaces:** State.AppIcon string work/office; appIconPNGFor(style) []byte, appLogoFor(c,size,style); reader.selectAppIcon(style), applyAppIcon(). Existing windowIcon remains canonical packaging fallback.
-- [ ] Add settings roundtrip/unknown/missing default and native selector restart/failing-save/demo tests; run RED.
-- [ ] Generate original monochrome work PNG with built-in tool; preserve cartoon sibling; implement normalization, cached previews and native selected icon updates without static binary edits.
-- [ ] Run focused and full Go/vet/Node/Python checks, native preview and Windows build/license check; Mac cross-compile. Document exact scope and generation prompt.
-- [ ] Commit locally, one fresh whole-change review; one Important fix pass with RED→GREEN and green suite. Keep public release unchanged and provide local preview.
+- [x] Add settings roundtrip/unknown/missing default and native selector restart/failing-save/demo tests; run RED.
+- [x] Generate original monochrome work PNG with built-in tool; preserve cartoon sibling; implement normalization, cached previews and native selected icon updates without static binary edits.
+- [x] Run focused and full Go/vet/Node/Python checks, native preview and Windows build/license check; Mac cross-compile. Document exact scope and generation prompt.
+- [x] Commit locally, one fresh whole-change review; one Important fix pass with RED→GREEN and green suite. Keep public release unchanged and provide local preview.
