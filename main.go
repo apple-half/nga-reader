@@ -124,7 +124,15 @@ func main() {
 	}
 	mygo.Theme.SetSource(source)
 	mygo.App.WhenReady(func() {
-		a.win = mygo.NewWindow(mygo.WindowOptions{Title: "工作台", Width: 1280, Height: 820, MinWidth: 980, MinHeight: 620, TitleBarStyle: mygo.TitleBarHidden, TitleBarHeight: 44, BackgroundColor: "#202020", Content: ui.View(a.view)})
+		a.win = mygo.NewWindow(mygo.WindowOptions{Title: "工作台", Width: a.state.WindowWidth, Height: a.state.WindowHeight, MinWidth: 980, MinHeight: 620, TitleBarStyle: mygo.TitleBarHidden, TitleBarHeight: 44, BackgroundColor: "#202020", Content: ui.View(a.view)})
+		a.win.OnResize(func() {
+			if !a.win.IsMaximized() && !a.win.IsFullScreen() {
+				w, h := a.win.Size()
+				if w >= 980 && h >= 620 {
+					a.state.WindowWidth, a.state.WindowHeight = w, h
+				}
+			}
+		})
 		_ = a.win.SetIcon(windowIcon())
 		a.win.OnClose(func(event *mygo.CloseEvent) {
 			if !a.canCloseForUpdate() {

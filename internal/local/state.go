@@ -41,10 +41,13 @@ type State struct {
 	LastTopic        int64       `json:"lastTopic"`
 	SidebarWidth     float32     `json:"sidebarWidth"`
 	TopicWidth       float32     `json:"topicWidth"`
+	SidebarHidden    bool        `json:"sidebarHidden,omitempty"`
+	WindowWidth      int         `json:"windowWidth,omitempty"`
+	WindowHeight     int         `json:"windowHeight,omitempty"`
 }
 
 func Defaults() State {
-	return State{Boards: []Board{{ID: -7, Name: "大漩涡"}}, Theme: "深色", FontSize: 15, TextOnly: true, LastBoard: -7, SidebarWidth: 180, TopicWidth: 310, AutoCheckUpdates: true}
+	return State{Boards: []Board{{ID: -7, Name: "大漩涡"}}, Theme: "深色", FontSize: 15, TextOnly: true, LastBoard: -7, SidebarWidth: 180, TopicWidth: 310, WindowWidth: 1280, WindowHeight: 820, AutoCheckUpdates: true}
 }
 
 func Load(dir string) (State, error) {
@@ -81,6 +84,8 @@ func normalize(s *State) {
 	}
 	s.SidebarWidth = min(280, max(160, s.SidebarWidth))
 	s.TopicWidth = min(450, max(240, s.TopicWidth))
+	s.WindowWidth = min(3840, max(980, s.WindowWidth))
+	s.WindowHeight = min(2160, max(620, s.WindowHeight))
 	s.History = normalizeReadings(s.History)
 	if len(s.Favorites) > 300 {
 		s.Favorites = s.Favorites[:300]

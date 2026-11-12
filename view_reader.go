@@ -13,13 +13,10 @@ import (
 func (a *reader) readerPane(c *ui.Context, p palette) {
 	ui.Column(c).Fill().Background(c.Theme().Background).Children(func() {
 		ui.Row(c).Height(57).Padding(0, 19).Gap(6).BorderWidth(0, 0, 1, 0).BorderColor(c.Theme().Border).Children(func() {
-			ui.Text(c, "话题").FontSize(12).TextColor(c.Theme().TextMuted)
-			ui.Icon(c, icons["right"]).Size(13, 13).TextColor(c.Theme().TextMuted)
-			ui.Text(c, "帖子阅读").FontSize(12).Grow(1)
+			ui.Text(c, "帖子阅读").FontSize(12).SingleLine().Grow(1)
 			ui.Button(c, "回复").FontSize(12).Padding(5, 9).Disabled(a.selected.ID <= 0 || a.loadingThread || a.threadErr != nil || a.compose.Sending).OnClick(func() {
 				a.openComposer(nga.PostTarget{Action: "reply", TID: a.selected.ID, FID: a.thread.Topic.FID}, a.selected.Title)
 			})
-			ui.Text(c, "图片按需").FontSize(11).TextColor(c.Theme().TextMuted).Tooltip("默认不加载图片，点击正文中的“展示图片”后预览").Padding(5, 8)
 			label := "收藏帖子"
 			if a.isFavorite(a.selected.ID) {
 				label = "取消收藏"

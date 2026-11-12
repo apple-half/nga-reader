@@ -110,11 +110,23 @@ func (a *reader) view(c *ui.Context) {
 		if a.focused {
 			ui.Column(c).Grow(1).MinHeight(0).Children(func() { a.readerPane(c, p) })
 		} else {
-			split := ui.Split(c, &a.state.SidebarWidth, func() { a.sidebar(c, p) }, func() {
-				ui.Split(c, &a.state.TopicWidth, func() { a.topicPane(c, p) }, func() { a.readerPane(c, p) }).SplitReset(310).Fill()
-			}).SplitReset(180).Grow(1).MinHeight(0)
-			if split.Changed() {
-				a.save()
+			width, _ := c.Size()
+			fit := layoutFor(width, a.state.SidebarWidth, a.state.TopicWidth, a.state.SidebarHidden)
+			body := func() {
+				split := ui.Split(c.Key("topics-split"), &fit.Topics, func() { a.topicPane(c, p) }, func() { a.readerPane(c, p) }).SplitReset(310).Fill()
+				if split.Changed() {
+					a.state.TopicWidth = min(450, max(240, fit.Topics))
+					a.save()
+				}
+			}
+			if fit.Sidebar == 0 {
+				ui.Column(c).Grow(1).MinHeight(0).Children(body)
+			} else {
+				split := ui.Split(c.Key("sidebar-split"), &fit.Sidebar, func() { a.sidebar(c, p) }, body).SplitReset(180).Grow(1).MinHeight(0)
+				if split.Changed() {
+					a.state.SidebarWidth = min(280, max(160, fit.Sidebar))
+					a.save()
+				}
 			}
 		}
 		a.statusbar(c, p)
@@ -130,6 +142,11 @@ func (a *reader) titlebar(c *ui.Context, p palette) {
 	bar := c.TitleBar()
 	ui.Row(c).Height(max(44, bar.Height)).Padding(0, bar.Right+13, 0, bar.Left+13).Gap(9).Background(p.side).BorderWidth(0, 0, 1, 0).BorderColor(c.Theme().Border).DragWindow().Children(func() {
 		ui.Icon(c, icons["app"]).Size(17, 17)
+		label := "收起板块栏"
+		if a.state.SidebarHidden {
+			label = "展开板块栏"
+		}
+		iconButton(c, "toggle-sidebar", "topics", label, false).OnClick(func() { a.state.SidebarHidden = !a.state.SidebarHidden; a.focused = false; a.save() })
 		ui.Text(c, "工作台").FontWeight(500)
 		ui.Text(c, "/ NGA Reader").FontSize(12).TextColor(c.Theme().TextMuted)
 		ui.Spacer(c).Grow(1)

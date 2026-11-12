@@ -37,6 +37,7 @@ func (a *reader) dialogs(c *ui.Context, p palette) {
 			ui.Button(c, "A+").Label("增大字号").Disabled(a.state.FontSize >= 22).OnClick(func() { a.state.FontSize++; a.save() })
 		})
 		ui.Text(c, "图片默认折叠，点击正文中的“展示图片”后，在 App 内打开预览。关闭预览会释放图片引擎。").FontSize(12).TextColor(c.Theme().TextMuted).LineHeight(1.7)
+		ui.Button(c, "恢复默认分栏").OnClick(a.resetLayout)
 		ui.Divider(c)
 		ui.Text(c, "NGA 账号").FontWeight(500)
 		ui.Text(c, "在 NGA 官方页面登录，成功后自动关闭登录页并返回工作台。").FontSize(12).TextColor(c.Theme().TextMuted).LineHeight(1.7)
