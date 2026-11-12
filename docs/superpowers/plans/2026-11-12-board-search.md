@@ -22,16 +22,16 @@
 ### Task1: Public directory, search and cache
 **Files:** internal/nga/directory.go, directory_seed.json, directory_test.go; internal/local/directory.go/tests.
 **Interfaces:** DirectoryEntry{ID,CollectionID,Name,Description,Category,Aliases}; ParseBoardDirectory(raw), EmbeddedBoardDirectory(), SearchBoardDirectory(entries,query); Client.BoardDirectory(ctx); local directory cache timestamp/read/write.
-- [ ] RED parser GB18030/wrapper/nesting/duplicates/collections, query normalization/aliases, public request no-cookie/limits/redirect/cancel and cache corruption/TTL tests.
-- [ ] Implement fixed-source safe decoding/normalization and bounded catalog, seed from observed public data, local search and cache; full Go suite GREEN; commit.
+- [x] RED parser GB18030/wrapper/nesting/duplicates/collections, query normalization/aliases, public request no-cookie/limits/redirect/cancel and cache corruption/TTL tests.
+- [x] Implement fixed-source safe decoding/normalization and bounded catalog, seed from observed public data, local search and cache; full Go suite GREEN; commit.
 
 ### Task2: Native picker and local addition
 **Files:** board_search.go, view_boards.go, app.go/view.go/view_settings.go/actions.go, native tests, usage docs.
-- [ ] RED name search/add-and-open/custom-name duplicate, unique Enter/ambiguous Enter/Escape, persist failure, collection guard, no-query-network, cache fallback and demo tests.
-- [ ] Implement search/manual tabs, bounded virtual results, refresh state and safe add actions; inspect three-theme/narrow previews; Go/vet GREEN; commit.
+- [x] RED name search/add-and-open/custom-name duplicate, unique Enter/ambiguous Enter/Escape, persist failure, collection guard, no-query-network, cache fallback and demo tests.
+- [x] Implement search/manual tabs, bounded virtual results, refresh state and safe add actions; inspect three-theme/narrow previews; Go/vet GREEN; commit.
 
 ### Task3: Verify and release
-- [ ] Version0.1.10, compact App notes, full release/download/help docs; Go/vet/Node/Python/actionlint/privacy checks.
-- [ ] One independent whole-branch review; fix Important/Critical with RED/GREEN, record limits. Merge/test/push new tag.
-- [ ] CI native3ZIPs/draft, verify hashes, offline sign/upload/finalize, verify live directory and signed indexes/public assets plus isolated Windows update.
-- [ ] Retain local3ZIPs and previews, archive records and remove only owned scratch copies.
+- [x] Version0.1.10, compact App notes, full release/download/help docs; Go/vet/Node/Python/actionlint/privacy checks.
+- [x] One independent whole-branch review; fix Important/Critical with RED/GREEN, record limits. Merge/test/push new tag.
+- [x] CI native3ZIPs/draft, verify hashes, offline sign/upload/finalize, verify live directory and signed indexes/public assets plus isolated Windows update.
+- [x] Retain local3ZIPs and previews, archive records and remove only owned scratch copies.
