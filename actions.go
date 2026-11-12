@@ -15,6 +15,7 @@ import (
 )
 
 func (a *reader) selectBoard(board local.Board) {
+	a.search = readerSearchState{}
 	a.recordNavigation()
 	a.flushReadingProgress()
 	a.reading = readingViewState{}
@@ -81,6 +82,7 @@ func (a *reader) selectTopic(t nga.Topic) {
 	a.selectTopicPage(t, 0)
 }
 func (a *reader) selectTopicPage(t nga.Topic, page int) {
+	a.search = readerSearchState{}
 	if a.selected.ID != t.ID || page != 0 && page != a.visibleThreadPage() {
 		a.recordNavigation()
 	}

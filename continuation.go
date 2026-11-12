@@ -73,7 +73,7 @@ func (a *reader) observeContinuation(viewport, last ui.Rect) {
 	if a.scroll.Y <= 1 {
 		a.continuation.AutoReady = false
 	}
-	if a.demo || !a.state.AutoNextPage || a.modalOpen() || a.navigationBusy() || a.loadingThread || a.continuation.Loading || a.continuation.Error != nil || a.continuationLimited() || a.reading.Pending != nil || a.reading.Settling > 0 || !a.continuationHasNext() {
+	if a.demo || !a.state.AutoNextPage || a.search.Open || a.modalOpen() || a.navigationBusy() || a.loadingThread || a.continuation.Loading || a.continuation.Error != nil || a.continuationLimited() || a.reading.Pending != nil || a.reading.Settling > 0 || !a.continuationHasNext() {
 		return
 	}
 	if a.continuation.AutoReady && viewport.H > 0 && last.H > 0 && last.Y+last.H >= viewport.Y && last.Y+last.H <= viewport.Y+viewport.H+180 {

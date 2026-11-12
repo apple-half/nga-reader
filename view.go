@@ -97,6 +97,13 @@ func (a *reader) view(c *ui.Context) {
 	a.ensureNavigationAccount()
 	p := a.theme(c)
 	if !a.modalOpen() && !a.navigationBusy() {
+		if c.Shortcut(ui.Cmd, ui.KeyF) {
+			a.openReaderSearch()
+		}
+		if a.search.Open && c.Shortcut(0, ui.KeyEscape) {
+			a.search.Open = false
+			a.search.Pending = false
+		}
 		if c.Shortcut(ui.Alt, ui.KeyLeft) {
 			a.navigateHistory(-1)
 		}

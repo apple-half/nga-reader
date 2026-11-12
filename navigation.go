@@ -84,6 +84,7 @@ func (a *reader) navigateHistory(delta int) {
 	}
 	a.flushReadingProgress()
 	a.navigation.Restoring = true
+	a.search = readerSearchState{}
 	defer func() { a.navigation.Restoring = false }()
 	if loc.Topic.FID != 0 && loc.Topic.FID != a.board.ID {
 		for _, b := range a.state.Boards {

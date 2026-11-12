@@ -24,7 +24,9 @@ func (a *reader) readerPane(c *ui.Context, p palette) {
 			iconButton(c, "bookmark", "bookmark", label, a.selected.ID <= 0).OnClick(a.toggleFavorite)
 			iconButton(c, "focus", "focus", "切换专注阅读", false).OnClick(func() { a.focused = !a.focused })
 			iconButton(c, "font", "text", "字号与主题设置", false).OnClick(func() { a.settingsOpen = true; a.formError = "" })
+			iconButton(c, "find-body", "search", "查找正文（Ctrl/Cmd+F）", a.selected.ID <= 0).OnClick(a.openReaderSearch)
 		})
+		a.readerSearchView(c)
 		if a.selected.ID <= 0 {
 			a.emptyReader(c, p)
 		} else {
@@ -62,6 +64,10 @@ func (a *reader) readerPane(c *ui.Context, p palette) {
 							}
 						})
 						return
+					}
+					activeSearch := -1
+					if a.search.Open {
+						activeSearch = a.searchActiveIndex()
 					}
 					for i, r := range a.rendered {
 						post := r
@@ -107,6 +113,9 @@ func (a *reader) readerPane(c *ui.Context, p palette) {
 							})
 							markdown.View(c, post.source, a.md).FillWidth()
 						})
+						if activeSearch == i {
+							row.Background(p.hover).Border(1, p.accent).Radius(6)
+						}
 						rows = append(rows, readingRow{Post: post.post, Bounds: row.Bounds(), Animated: post.animated, Page: post.page})
 					}
 					if len(a.rendered) == 0 {
@@ -118,6 +127,7 @@ func (a *reader) readerPane(c *ui.Context, p palette) {
 				})
 			})
 			a.observeReadingView(c, viewport.Bounds(), rows)
+			a.observeSearch(c, viewport.Bounds(), rows)
 			if len(rows) > 0 {
 				a.observeContinuation(viewport.Bounds(), rows[len(rows)-1].Bounds)
 			}

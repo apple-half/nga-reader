@@ -40,6 +40,7 @@ func (a *reader) readTask(fn func()) {
 	}
 }
 func (a *reader) resetReadingSession() {
+	a.search = readerSearchState{}
 	a.navigation = readingNavigation{}
 	a.flushReadingProgress()
 	a.topicGate.Begin(a.ctx)

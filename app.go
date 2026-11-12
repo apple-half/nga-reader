@@ -18,10 +18,11 @@ import (
 )
 
 type renderedPost struct {
-	post     nga.Post
-	source   string
-	animated bool
-	page     int
+	post       nga.Post
+	source     string
+	animated   bool
+	page       int
+	searchText string
 }
 type reader struct {
 	dir                                           string
@@ -77,6 +78,7 @@ type reader struct {
 	scroll                                        ui.ScrollState
 	reading                                       readingViewState
 	navigation                                    readingNavigation
+	search                                        readerSearchState
 	continuation                                  continuationState
 	refreshingThread                              bool
 	refreshError                                  error
