@@ -1,14 +1,14 @@
 {
   "manifest": {
-    "version": "0.1.10",
-    "notes": "本次更新\n\n- 新增板块名称搜索，搜索汽车、数码、大漩涡等名称即可添加。\n- 内置首页公开目录，离线可搜索，目录过期时后台刷新。\n- 已有板块直接打开，保留自定义名称；仍可用链接或编号添加。\n- 合集单独标记，提供官网查看，避免误加成上级板块。\n\n更新保留设置、收藏、历史和草稿，重启后生效。\n0.1.7持续提示403时，请从发布页手动下载一次新版。\n",
-    "date": "2026-11-12T02:03:47Z",
+    "version": "0.1.11",
+    "notes": "本次更新\n\n- 支持NGA自带265个表情，正文与引用原生行内显示。\n- 表情按字号等比例缩放并限制尺寸，不再显示成通用占位文字。\n- 内置表情资源，离线可用；普通图片仍点击才加载。\n- 修复旧数字表情可能吞掉后文，未知表情保留原代码。\n- 深色主题黑线条表情有浅色底衬，脸红动图支持原生播放。\n\n更新保留设置、收藏、历史和草稿，重启后生效。\n0.1.7持续提示403时，请从发布页手动下载一次新版。\n",
+    "date": "2026-11-12T03:52:39Z",
     "target": "darwin-arm64",
-    "url": "https://github.com/apple-half/nga-reader/releases/download/v0.1.10/nga-reader-0.1.10-darwin-arm64.tar.gz",
-    "size": 5957733,
-    "sha256": "fe793a561c6afd3f3f83fd0aff4fc6afd40f39acab811946089ad249c1039265",
-    "signature": "pZSCxxh1JHiHAQNGBbrezSDjn3qjYHqEdBcchP/1HzZcGIgMB+W+6wTZQYoDoprhE5fPi+Xi8jytmX6z/cWaCg==",
-    "metadataSignature": "H5BI9PznxNC+2+Q+sXaN0KOwiR/U3yn84vumqkfAOzomhhbpVS8Wp2R5QcUn46KNnYksoiQRokDk831pGU8sBw=="
+    "url": "https://github.com/apple-half/nga-reader/releases/download/v0.1.11/nga-reader-0.1.11-darwin-arm64.tar.gz",
+    "size": 6675401,
+    "sha256": "1a0004e17e07bf67e41b43bcf25641d955f0b8be9ff34fa02b6cd66a1ebe252f",
+    "signature": "tPgkjqTC5srvgnF0dgL/QMZvwwV7YjrCPYc06vrWyXZOFxocQSMewC94mNyzBsJnZy/LmWVaOUJwdunq5JpkAg==",
+    "metadataSignature": "uyd2wCcXyiHz0fp3QrhahrcsQnOzmnnm7uv3ZLLWF5amf0Gc86z0xoik+LxJ4lQeCjpWNCnXbR/4KD7rz/itBQ=="
   },
   "prerelease": true
 }
