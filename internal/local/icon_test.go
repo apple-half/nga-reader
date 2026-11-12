@@ -15,6 +15,11 @@ func TestAppIconPreferenceMigratesAndSurvivesRestart(t *testing.T) {
 		{`{"appIcon":"office","theme":"浅色","fontSize":17}`, "office"},
 		{`{"appIcon":"work","theme":"浅色","fontSize":17}`, "work"},
 		{`{"appIcon":"../outside.png","theme":"浅色","fontSize":17}`, "work"},
+		{`{"appIcon":42,"theme":"浅色","fontSize":17}`, "work"},
+		{`{"appIcon":false,"theme":"浅色","fontSize":17}`, "work"},
+		{`{"appIcon":{},"theme":"浅色","fontSize":17}`, "work"},
+		{`{"appIcon":[],"theme":"浅色","fontSize":17}`, "work"},
+		{`{"appIcon":null,"theme":"浅色","fontSize":17}`, "work"},
 	} {
 		dir := t.TempDir()
 		if err := os.WriteFile(filepath.Join(dir, "settings.json"), []byte(tc.input), 0600); err != nil {

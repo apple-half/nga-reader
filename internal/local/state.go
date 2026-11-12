@@ -48,6 +48,26 @@ type State struct {
 	AutoNextPage     bool        `json:"autoNextPage"`
 }
 
+// Treat only the optional icon preference tolerantly. An unsupported JSON
+// value must not send otherwise valid boards, favorites and preferences through
+// whole-file corruption recovery. Other fields retain their normal decoding.
+func (s *State) UnmarshalJSON(raw []byte) error {
+	type stateJSON State
+	value := struct {
+		*stateJSON
+		AppIcon json.RawMessage `json:"appIcon"`
+	}{stateJSON: (*stateJSON)(s)}
+	if err := json.Unmarshal(raw, &value); err != nil {
+		return err
+	}
+	s.AppIcon = "work"
+	var icon string
+	if json.Unmarshal(value.AppIcon, &icon) == nil && icon == "office" {
+		s.AppIcon = "office"
+	}
+	return nil
+}
+
 func Defaults() State {
 	return State{Boards: []Board{{ID: -7, Name: "大漩涡"}}, Theme: "深色", AppIcon: "work", FontSize: 15, TextOnly: true, LastBoard: -7, SidebarWidth: 180, TopicWidth: 310, WindowWidth: 1280, WindowHeight: 820, AutoCheckUpdates: true, AutoNextPage: true}
 }
