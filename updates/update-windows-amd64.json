@@ -1,14 +1,14 @@
 {
   "manifest": {
-    "version": "0.1.9",
-    "notes": "本次更新\n\n- 升级弹窗重新排版，突出版本和本次改动。\n- 更新说明改为简短列表，不再混入下载表格和长链接。\n- 下载进度、错误提示、安装与重启按钮固定可见。\n- 包含已读／新回复标记、楼层续读和页码跳转。\n\n更新保留设置、收藏、历史和草稿，重启后生效。\n0.1.7持续提示403时，请从发布页手动下载一次新版。\n",
-    "date": "2026-11-12T00:58:24Z",
+    "version": "0.1.10",
+    "notes": "本次更新\n\n- 新增板块名称搜索，搜索汽车、数码、大漩涡等名称即可添加。\n- 内置首页公开目录，离线可搜索，目录过期时后台刷新。\n- 已有板块直接打开，保留自定义名称；仍可用链接或编号添加。\n- 合集单独标记，提供官网查看，避免误加成上级板块。\n\n更新保留设置、收藏、历史和草稿，重启后生效。\n0.1.7持续提示403时，请从发布页手动下载一次新版。\n",
+    "date": "2026-11-12T02:03:47Z",
     "target": "windows-amd64",
-    "url": "https://github.com/apple-half/nga-reader/releases/download/v0.1.9/nga-reader-0.1.9-windows-amd64.tar.gz",
-    "size": 6461170,
-    "sha256": "261e07a985b124b70a9c171caf7ffd1d10ed6f9b3a3225afc17a7f521c3fa95d",
-    "signature": "ZjDBDp5PcBtL9uuUIJCnyd8E7KcFXVEpqT+GOrc4MgeeszRFSzh8u26/o/J+3+3kaHwsgMX4wBR/3sBsUMjXDg==",
-    "metadataSignature": "8/wi5zH66yAKgoYeH6y2UuuCJ9D6DkdZEZ0IEGiPQIj0ySNsPhUW7+nZmcSy48yyvaTWgecV5DlxS//RoRFUAw=="
+    "url": "https://github.com/apple-half/nga-reader/releases/download/v0.1.10/nga-reader-0.1.10-windows-amd64.tar.gz",
+    "size": 6529488,
+    "sha256": "6582b683786b930634c35e0d142874daea83d7222901cf4c3df6dddfcf0c86aa",
+    "signature": "cci9TsgaWsNXozYsKx0gY3PNZ2UXLz4EooRkXqp1n7kops/C1st2LGMUQPm980ZaaM3hGXaWKAzCABNyEwX3Cg==",
+    "metadataSignature": "IGtf8LNw6cNvpEOc0i8GnpFdgTe7SQ9W/13azI0tdIB23tQPN70zsnfz0qwRZsQBgrj2bKwxsc2vXSRGaCysAQ=="
   },
   "prerelease": true
 }

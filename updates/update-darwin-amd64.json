@@ -1,14 +1,14 @@
 {
   "manifest": {
-    "version": "0.1.9",
-    "notes": "本次更新\n\n- 升级弹窗重新排版，突出版本和本次改动。\n- 更新说明改为简短列表，不再混入下载表格和长链接。\n- 下载进度、错误提示、安装与重启按钮固定可见。\n- 包含已读／新回复标记、楼层续读和页码跳转。\n\n更新保留设置、收藏、历史和草稿，重启后生效。\n0.1.7持续提示403时，请从发布页手动下载一次新版。\n",
-    "date": "2026-11-12T00:58:24Z",
+    "version": "0.1.10",
+    "notes": "本次更新\n\n- 新增板块名称搜索，搜索汽车、数码、大漩涡等名称即可添加。\n- 内置首页公开目录，离线可搜索，目录过期时后台刷新。\n- 已有板块直接打开，保留自定义名称；仍可用链接或编号添加。\n- 合集单独标记，提供官网查看，避免误加成上级板块。\n\n更新保留设置、收藏、历史和草稿，重启后生效。\n0.1.7持续提示403时，请从发布页手动下载一次新版。\n",
+    "date": "2026-11-12T02:03:47Z",
     "target": "darwin-amd64",
-    "url": "https://github.com/apple-half/nga-reader/releases/download/v0.1.9/nga-reader-0.1.9-darwin-amd64.tar.gz",
-    "size": 6498931,
-    "sha256": "1602d4df875fcfed38c4993f2123952289f5af35e7cd2969084f63568f3310e0",
-    "signature": "DI1Cye9FEAKVLL1IQK2LHD/5WZhHx51RSWJjgERhFSNMGf9vmn2Y6bvsJInJSxfUVr1gi4cckgQBPf8uLWEzCw==",
-    "metadataSignature": "dmzzX8VYM+bVvHU+SEOZHEWTqBS+ORkyC97RJnhWNoBXgPC7hRBbGK/U5EYSBb5UgA+tT0J4rnlEa0WACjpfBQ=="
+    "url": "https://github.com/apple-half/nga-reader/releases/download/v0.1.10/nga-reader-0.1.10-darwin-amd64.tar.gz",
+    "size": 6564723,
+    "sha256": "93914efb13edc9ffe3b129f49610913dbabfab37dba306082bf96a344264eaa0",
+    "signature": "LgCEH8/ArwERVLSmHTS7vdyP99TuGx4jvUVf4DJwhx3i2R6PUS6L4IGgS4h8Xlvj+VXL/ZEgrKDvK16PlXZPCw==",
+    "metadataSignature": "2Y7NL4TpVtT2y+3j+Iw6aCYK7Y4vFiWCOBAlag85G5g1NreALgnOTAs4b5dvJgAfY9uEK1BtlvFJi5Wm/Dz/BA=="
   },
   "prerelease": true
 }
