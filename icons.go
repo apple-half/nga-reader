@@ -2,9 +2,9 @@ package main
 
 import (
 	"bytes"
-	"image"
-	"image/color"
+	_ "embed"
 	"image/png"
+	"sync"
 
 	"github.com/egoist/mygo/ui"
 )
@@ -31,21 +31,19 @@ var icons = map[string]*ui.SVG{
 	"user":  svg(`<circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/>`),
 }
 
-func windowIcon() []byte {
-	img := image.NewNRGBA(image.Rect(0, 0, 64, 64))
-	bg := color.NRGBA{R: 45, G: 49, B: 43, A: 255}
-	fg := color.NRGBA{R: 215, G: 226, B: 207, A: 255}
-	for y := range 64 {
-		for x := range 64 {
-			if x >= 4 && x < 60 && y >= 4 && y < 60 {
-				img.SetNRGBA(x, y, bg)
-			}
-			if (x >= 15 && x <= 48 && (y == 16 || y == 17 || y == 27 || y == 28 || y == 47 || y == 48)) || (y >= 16 && y <= 48 && (x == 15 || x == 16 || x == 47 || x == 48)) || (x >= 26 && x <= 27 && y >= 28 && y <= 47) {
-				img.SetNRGBA(x, y, fg)
-			}
+//go:embed packaging/icon.png
+var appIconPNG []byte
+var appIconOnce sync.Once
+var appIconBitmap *ui.Bitmap
+
+func windowIcon() []byte { return appIconPNG }
+func appLogo(c *ui.Context, size float32) ui.Element {
+	appIconOnce.Do(func() {
+		img, err := png.Decode(bytes.NewReader(appIconPNG))
+		if err != nil {
+			panic("invalid embedded app icon")
 		}
-	}
-	var b bytes.Buffer
-	_ = png.Encode(&b, img)
-	return b.Bytes()
+		appIconBitmap = ui.NewBitmap(img)
+	})
+	return ui.Image(c, appIconBitmap).Size(size, size)
 }

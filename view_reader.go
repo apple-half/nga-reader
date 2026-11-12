@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/egoist/mygo/ui"
-	"github.com/egoist/mygo/ui/markdown"
 	"ngareader/internal/nga"
 )
 
@@ -111,7 +110,7 @@ func (a *reader) readerPane(c *ui.Context, p palette) {
 									a.openComposer(nga.PostTarget{Action: "quote", TID: a.selected.ID, FID: a.thread.Topic.FID, PID: post.post.ID}, fmt.Sprintf("%s · #%d %s", a.selected.Title, post.post.Floor, post.post.Author))
 								})
 							})
-							markdown.View(c, post.source, a.md).FillWidth()
+							a.bodyMarkdown(c, post.source)
 						})
 						if activeSearch == i {
 							row.Background(p.hover).Border(1, p.accent).Radius(6)
@@ -140,7 +139,7 @@ func (a *reader) readerPane(c *ui.Context, p palette) {
 }
 func (a *reader) emptyReader(c *ui.Context, p palette) {
 	ui.Column(c).Grow(1).MinHeight(0).Padding(36).Center().Gap(14).Children(func() {
-		ui.Icon(c, icons["app"]).Size(31, 31).TextColor(c.Theme().TextMuted)
+		appLogo(c, 64)
 		heading := "从左侧选择一个话题"
 		description := "帖子正文和回复会显示在这里。"
 		if !a.client.HasSession() {

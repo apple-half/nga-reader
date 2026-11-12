@@ -15,6 +15,7 @@ import (
 
 	"github.com/egoist/mygo/ui"
 	"github.com/egoist/mygo/ui/markdown"
+	"github.com/egoist/mygo/ui/markdown/parser"
 	"ngareader/internal/emotes"
 )
 
@@ -285,22 +286,42 @@ func checkEmoteGIF(raw []byte, width, height int) error {
 	return bad
 }
 
-func containsAnimatedEmote(source string) bool {
-	const prefix = "ngareader-emote://asset/"
-	for {
-		_, tail, ok := strings.Cut(source, prefix)
-		if !ok {
-			return false
+func inlineHasEmote(in []parser.Inline, animatedOnly bool) bool {
+	for k := 0; k < len(in); k++ {
+		n := in[k]
+		if n.Kind == parser.Image {
+			k = n.Next - 1
+			continue
 		}
-		end := strings.IndexAny(tail, ">)\" \t\r\n")
-		if end < 0 {
-			return false
+		if n.Kind != parser.Link || n.Pending {
+			continue
 		}
-		if info, ok := emotes.Info(tail[:end]); ok && info.Frames > 1 {
+		if e, ok := emotes.FromDestination(n.Dest); ok {
+			if !animatedOnly {
+				return true
+			}
+			if info, ok := emotes.Info(e.File); ok && info.Frames > 1 {
+				return true
+			}
+		}
+	}
+	return false
+}
+func hasRenderedEmote(source string, animatedOnly bool) bool {
+	if !strings.Contains(source, "ngareader-emote://asset/") {
+		return false
+	}
+	d := parser.Parse(source)
+	for i := 1; i < d.Len(); i++ {
+		if inlineHasEmote(d.Inlines(i), animatedOnly) {
 			return true
 		}
-		source = tail[end:]
 	}
+	return false
+}
+
+func containsAnimatedEmote(source string) bool {
+	return hasRenderedEmote(source, true)
 }
 
 func animatedEmoteVisible(viewport ui.Rect, rows []readingRow) bool {

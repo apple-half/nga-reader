@@ -5,7 +5,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/egoist/mygo/ui"
-	"github.com/egoist/mygo/ui/markdown"
 	"ngareader/internal/nga"
 )
 
@@ -94,7 +93,7 @@ func (a *reader) composerView(c *ui.Context) {
 							ui.Text(c, "还没有正文，返回编辑后即可预览。").TextColor(c.Theme().TextMuted)
 						} else {
 							source := nga.MarkdownOnDemand(s.Draft.Content)
-							markdown.View(c, source, a.md).FillWidth()
+							a.bodyMarkdown(c, source)
 							if containsAnimatedEmote(source) {
 								c.After(a.emoteView.nextFrameDelay())
 							}
