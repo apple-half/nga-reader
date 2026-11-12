@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Fix both emoticon defects, integrate the user-specified office-worker cartoon logo, publish verified0.1.12 stable portable release.
+**Goal:** Fix both emoticon defects, integrate the user-specified office-worker cartoon logo, publish verified0.1.13 stable portable release.
 **Architecture:** Public MyGo rich-text/selection callbacks with emote source mapping; structural animation detection; one embedded PNG; existing signed-release pipeline changed to stable.
 **Tech Stack:** Go1.27.3/MyGo0.8.3, Python packaging, GitHub Actions, built-in image generation. No new dependency.
 **Spec:** docs/superpowers/specs/2026-11-12-stable-release-design.md
@@ -39,11 +39,11 @@
 **Files:** packaging/publish.py/package.py/test_publish.py, release.yml, DOWNLOAD.md/README.md/SECURITY.md, notes and validation.
 **Interfaces:** stage as stable draft, finalize with prerelease=false and Latest only after complete verification; feed wrapper reflects published state.
 - [ ] Add publisher behavior test starting from prerelease draft, require stable Latest final state; RED then implement GREEN.
-- [ ] Update0.1.12 full web release notes and short App notes, manual, download pointers and version metadata; run Go/vet/Node/Python/version/privacy/diff checks.
+- [ ] Update0.1.13 full web release notes and short App notes, manual, download pointers and version metadata; run Go/vet/Node/Python/version/privacy/diff checks.
 - [ ] One fresh whole-branch review; one Important/Critical fix pass RED→GREEN and full suite. Preserve reviewer rulings.
 
 ### Task 4: Verify native builds, sign and publish
 **Files:** public validation docs and local QA archive/package outputs.
-- [ ] Fast-forward main, annotated v0.1.12 tag, atomic push; observe native CI3 platforms stage draft.
+- [ ] Fast-forward main, annotated v0.1.13 tag, atomic push; observe native CI3 platforms stage draft.
 - [ ] Verify downloaded CI ZIPs against artifact/draft digests and package checks, offline sign update assets, verify signatures and compact notes.
 - [ ] Upload six signed assets, finalize through verified stable pipeline, observe success, re-download/verify public10 assets and feed. Save3 final portable ZIPs locally, update root AGENTS, archive owned QA, clean temporary binaries.

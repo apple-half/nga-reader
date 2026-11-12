@@ -18,7 +18,11 @@ func TestExperienceSettingsRemainReachableAtMinimumWindow(t *testing.T) {
 	tt.Scroll(650, 400, 0, 1200)
 	writePreview(t, tt, "experience-settings-scrolled")
 	footer, _ := tt.Find("查看界面演示")
-	if footer.H < 16 {
+	// Text metrics differ across system fonts. Compare against a complete
+	// instance of the same control, rather than a Windows-specific height.
+	reference := ui.NewTester(func(c *ui.Context) { a.theme(c); ui.Button(c, "查看界面演示") }, 300, 100)
+	full, ok := reference.Find("查看界面演示")
+	if !ok || footer.H+.5 < full.H {
 		t.Fatalf("settings footer is clipped after scrolling: %+v", footer)
 	}
 	if err := tt.Click("查看界面演示"); err != nil {

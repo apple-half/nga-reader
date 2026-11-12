@@ -4,18 +4,18 @@
 
 | 你的电脑 | 直接下载 | 打开方式 |
 | --- | --- | --- |
-| **Windows 64 位** | **[下载 Windows 免安装包](https://github.com/apple-half/nga-reader/releases/download/v0.1.12/NGAReader-0.1.12-Windows-x64-portable.zip)** | 解压整个文件夹，双击 `NGAReader.exe` |
-| **Mac · Apple 芯片（M 系列）** | **[下载 Mac M 系列免安装包](https://github.com/apple-half/nga-reader/releases/download/v0.1.12/NGAReader-0.1.12-macOS-AppleSilicon-portable.zip)** | 解压后打开 `NGAReader.app` |
-| **Mac · Intel 芯片** | **[下载 Mac Intel 免安装包](https://github.com/apple-half/nga-reader/releases/download/v0.1.12/NGAReader-0.1.12-macOS-Intel-portable.zip)** | 解压后打开 `NGAReader.app` |
+| **Windows 64 位** | **[下载 Windows 免安装包](https://github.com/apple-half/nga-reader/releases/download/v0.1.13/NGAReader-0.1.13-Windows-x64-portable.zip)** | 解压整个文件夹，双击 `NGAReader.exe` |
+| **Mac · Apple 芯片（M 系列）** | **[下载 Mac M 系列免安装包](https://github.com/apple-half/nga-reader/releases/download/v0.1.13/NGAReader-0.1.13-macOS-AppleSilicon-portable.zip)** | 解压后打开 `NGAReader.app` |
+| **Mac · Intel 芯片** | **[下载 Mac Intel 免安装包](https://github.com/apple-half/nga-reader/releases/download/v0.1.13/NGAReader-0.1.13-macOS-Intel-portable.zip)** | 解压后打开 `NGAReader.app` |
 
 Mac 用户可在“苹果菜单 → 关于本机”查看芯片。最低支持 macOS 12。
 
-**从旧版升级：先退出旧版，替换程序并保留原数据目录。** 0.1.6及更早版本，或0.1.7检查更新一直显示HTTP403时，请手动下载一次0.1.12。
+**从旧版升级：先退出旧版，替换程序并保留原数据目录。** 0.1.6及更早版本，或0.1.7检查更新一直显示HTTP403时，请手动下载一次0.1.13。
 
 <details>
 <summary>展开查看更新说明与使用提醒</summary>
 
-### 0.1.12 正式版改进
+### 0.1.13 正式版改进
 
 - **自动续页**：向下滚动接近底部时追加下一页，保留已有正文和位置；错误提供重试，空页或重复页停止。单段最多10页或200楼，超长帖点击“继续下一段”。
 - **刷新和定位**：同页刷新保留正文；滚到连续页、调整字号、前进后退和切换只看楼主时保持正确页码及楼层。
@@ -42,7 +42,7 @@ Windows数据位于EXE同级`data`，Mac位于`~/Library/Application Support/NGA
 - 核对265份官方图片的摘要、尺寸与帧数；回归覆盖名称／旧数字／未知表情、代码与引用、HTML兼容正文、内置路径白名单、字体12～22、三主题、GIF透明补丁／处置／时序和解码预算。
 - GitHub Actions在Windows x64、macOS arm64与Intel环境测试、构建和检查包结构，Mac检查ad-hoc签名。这些检查不覆盖全部真实GUI操作；Mac实际更新仍需真机使用核验。
 - Windows没有Authenticode签名；Mac仅有ad-hoc完整性签名，没有Apple Developer ID或公证。更新签名不等同于系统代码签名，系统仍可能阻止启动。
-- 早期Windows 0.1.2曾被360检出，0.1.2/0.1.3复核未通过且未提供具体依据。**0.1.12尚无360放行结论**；功能测试、更新签名与源码公开不能代替恶意软件鉴定。
+- 早期Windows 0.1.2曾被360检出，0.1.2/0.1.3复核未通过且未提供具体依据。**0.1.13尚无360放行结论**；功能测试、更新签名与源码公开不能代替恶意软件鉴定。
 - `SHA256SUMS.txt`核对三份ZIP和六份更新资产的下载内容，不构成安全认证；包内保留MIT及依赖许可；NGA表情素材保留原作者权利，另附来源声明，不适用源码MIT许可证。
 
 </details>

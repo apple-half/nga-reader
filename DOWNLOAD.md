@@ -1,14 +1,14 @@
 # 下载 NGA Reader
 
-**当前版本：0.1.12 · 正式版 · 免安装版**
+**当前版本：0.1.13 · 正式版 · 免安装版**
 
 选择你的系统，下载 ZIP，解压后即可使用。
 
 | 你的电脑 | 下载免安装包 | 打开方式 |
 | --- | --- | --- |
-| **Windows 64 位** | **[下载 Windows 版](https://github.com/apple-half/nga-reader/releases/download/v0.1.12/NGAReader-0.1.12-Windows-x64-portable.zip)** | 解压整个文件夹，打开 `NGAReader.exe` |
-| **Mac · Apple 芯片（M 系列）** | **[下载 Mac M 系列版](https://github.com/apple-half/nga-reader/releases/download/v0.1.12/NGAReader-0.1.12-macOS-AppleSilicon-portable.zip)** | 解压后打开 `NGAReader.app` |
-| **Mac · Intel 芯片** | **[下载 Mac Intel 版](https://github.com/apple-half/nga-reader/releases/download/v0.1.12/NGAReader-0.1.12-macOS-Intel-portable.zip)** | 解压后打开 `NGAReader.app` |
+| **Windows 64 位** | **[下载 Windows 版](https://github.com/apple-half/nga-reader/releases/download/v0.1.13/NGAReader-0.1.13-Windows-x64-portable.zip)** | 解压整个文件夹，打开 `NGAReader.exe` |
+| **Mac · Apple 芯片（M 系列）** | **[下载 Mac M 系列版](https://github.com/apple-half/nga-reader/releases/download/v0.1.13/NGAReader-0.1.13-macOS-AppleSilicon-portable.zip)** | 解压后打开 `NGAReader.app` |
+| **Mac · Intel 芯片** | **[下载 Mac Intel 版](https://github.com/apple-half/nga-reader/releases/download/v0.1.13/NGAReader-0.1.13-macOS-Intel-portable.zip)** | 解压后打开 `NGAReader.app` |
 
 Mac 用户可在“苹果菜单 → 关于本机”查看芯片类型。Mac 最低支持 macOS 12。
 
@@ -23,6 +23,6 @@ Mac 用户可在“苹果菜单 → 关于本机”查看芯片类型。Mac 最�
 
 Windows 官方登录和图片预览需要已有 WebView2 Runtime。程序没有 Windows 商业代码签名或 Apple 公证；本版尚无360放行结论，系统或安全软件可能拦截。详情见[安全说明](SECURITY.md)。
 
-[查看 0.1.12 更新说明](https://github.com/apple-half/nga-reader/releases/tag/v0.1.12) · [查看使用说明](resources/usage.md)
+[查看 0.1.13 更新说明](https://github.com/apple-half/nga-reader/releases/tag/v0.1.13) · [查看使用说明](resources/usage.md)
 
 </details>
