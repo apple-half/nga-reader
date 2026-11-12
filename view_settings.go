@@ -38,6 +38,7 @@ func (a *reader) dialogs(c *ui.Context, p palette) {
 		})
 		ui.Text(c, "图片默认折叠，点击正文中的“展示图片”后，在 App 内打开预览。关闭预览会释放图片引擎。").FontSize(12).TextColor(c.Theme().TextMuted).LineHeight(1.7)
 		ui.Button(c, "恢复默认分栏").OnClick(a.resetLayout)
+		ui.Checkbox(c, &a.state.AutoNextPage, "滚动到底部自动加载下一页").OnChange(a.save)
 		ui.Divider(c)
 		ui.Text(c, "NGA 账号").FontWeight(500)
 		ui.Text(c, "在 NGA 官方页面登录，成功后自动关闭登录页并返回工作台。").FontSize(12).TextColor(c.Theme().TextMuted).LineHeight(1.7)

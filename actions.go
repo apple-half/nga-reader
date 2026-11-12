@@ -27,6 +27,9 @@ func (a *reader) selectBoard(board local.Board) {
 	a.rendered = nil
 	a.threadErr = nil
 	a.loadingThread = false
+	a.continuation = continuationState{}
+	a.refreshError = nil
+	a.refreshingThread = false
 	a.resetMarkdown()
 	a.onlyAuthor = false
 	a.threadGate.Begin(a.ctx)
@@ -101,16 +104,27 @@ func (a *reader) loadThreadAt(page int, fromStart bool) {
 		a.notify("这个条目是板块或合集入口，请使用板块链接添加")
 		return
 	}
-	a.prepareReadingLoad(page)
+	keep := !fromStart && len(a.rendered) > 0 && a.thread.Topic.ID == a.selected.ID && a.hasLoadedPage(page) && page == a.visibleThreadPage() && a.loadedOnlyAuthor == a.onlyAuthor
+	if !keep {
+		a.prepareReadingLoad(page)
+	} else {
+		a.flushReadingProgress()
+	}
 	if fromStart {
 		a.reading.Pending = nil
 	}
-	a.scroll = ui.ScrollState{}
+	if !keep {
+		a.scroll = ui.ScrollState{}
+		a.continuation = continuationState{}
+	}
 	a.threadErr = nil
+	a.refreshError = nil
+	a.refreshingThread = keep
 	if a.demo {
 		a.thread = demoThread(a.selected.ID)
 		a.loadingThread = false
 		a.resetMarkdown()
+		a.resetContinuousPage()
 		if fromStart {
 			a.clearReadingPosition()
 		}
@@ -131,8 +145,11 @@ func (a *reader) loadThreadAt(page int, fromStart bool) {
 			authorID = selected.AuthorID
 		}
 	}
-	a.thread = nga.ThreadPage{Topic: selected, Page: page, MainAuthorID: authorID}
-	a.resetMarkdown()
+	if !keep {
+		a.thread = nga.ThreadPage{Topic: selected, Page: page, MainAuthorID: authorID}
+		a.resetMarkdown()
+	}
+	a.continuation.Loading = false
 	a.readTask(func() {
 		result, err := a.client.Thread(ctx, selected.ID, page, authorID)
 		a.update(func() {
@@ -140,9 +157,14 @@ func (a *reader) loadThreadAt(page int, fromStart bool) {
 				return
 			}
 			a.loadingThread = false
+			a.refreshingThread = false
 			if err != nil {
 				if !errors.Is(err, context.Canceled) {
-					a.threadErr = err
+					if keep {
+						a.refreshError = err
+					} else {
+						a.threadErr = err
+					}
 				}
 				return
 			}
@@ -165,6 +187,15 @@ func (a *reader) loadThreadAt(page int, fromStart bool) {
 			if result.TotalRows == 0 {
 				result.Topic.Replies = selected.Replies
 			}
+			if keep {
+				if r, ok := local.FindReading(a.state.History, a.selected.ID, a.readingUID()); ok && r.Position != nil {
+					a.reading.Pending = &readingRestore{TopicID: a.selected.ID, UID: a.readingUID(), Page: r.Page, Position: *r.Position, Quiet: true}
+					a.reading.Warm = 0
+				}
+				a.replaceLoadedPage(result)
+				a.selected = result.Topic
+				return
+			}
 			a.thread = result
 			a.selected = result.Topic
 			if a.linkLastTopic == selected.ID {
@@ -175,6 +206,7 @@ func (a *reader) loadThreadAt(page int, fromStart bool) {
 				}
 			}
 			a.resetMarkdown()
+			a.resetContinuousPage()
 			if fromStart {
 				a.clearReadingPosition()
 			}

@@ -87,7 +87,7 @@ func (a *reader) applyPageJump() {
 	}
 }
 func (a *reader) navigateThreadPage(page int) {
-	if a.navigationBusy() || a.demo || a.loadingThread || a.selected.ID <= 0 || page == a.thread.Page && a.threadErr == nil {
+	if a.navigationBusy() || a.demo || a.loadingThread || a.selected.ID <= 0 || page == a.visibleThreadPage() && a.threadErr == nil {
 		return
 	}
 	if _, err := parsePageInput(strconv.Itoa(page), a.threadPageLimit()); err != nil {
@@ -142,7 +142,7 @@ func (a *reader) toggleAuthorFilter() {
 }
 func (a *reader) readingToTop() { a.reading.Pending = nil; a.reading.Settling = 2; a.scroll.Y = 0 }
 func (a *reader) modalOpen() bool {
-	return a.settingsOpen || a.addOpen || a.linkOpen || a.cookieOpen || a.helpOpen || a.compose.Open || a.updates.Open || a.jump.Open
+	return a.settingsOpen || a.addOpen || a.linkOpen || a.cookieOpen || a.helpOpen || a.compose.Open || a.updates.Open || a.jump.Open || a.manager.Open
 }
 func (a *reader) openLinkDialog() {
 	if !a.navigationBusy() {

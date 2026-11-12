@@ -37,9 +37,18 @@ func (a *reader) readerPane(c *ui.Context, p palette) {
 					}
 					ui.Text(c, "#  "+category).FontSize(11).TextColor(c.Theme().TextMuted).Margin(0, 0, 12, 0)
 					ui.Text(c, a.selected.Title).FontSize(22).FontWeight(500).LineHeight(1.5).Margin(0, 0, 21, 0).Selectable()
-					if a.loadingThread {
+					if a.loadingThread && !a.refreshingThread {
 						ui.Text(c, "正在加载正文…").FontSize(13).TextColor(c.Theme().TextMuted)
 						return
+					}
+					if a.refreshingThread {
+						ui.Text(c, "正在刷新正文，已有内容仍可阅读…").FontSize(12).TextColor(c.Theme().TextMuted).Margin(0, 0, 12, 0)
+					}
+					if a.refreshError != nil {
+						ui.Row(c).Gap(8).Margin(0, 0, 12, 0).Children(func() {
+							ui.Text(c, "刷新失败："+errorMessage(a.refreshError)).FontSize(12).TextColor(c.Theme().TextMuted).Grow(1)
+							ui.Button(c, "重试刷新").OnClick(func() { a.loadThread(a.visibleThreadPage()) })
+						})
 					}
 					if a.threadErr != nil {
 						ui.Text(c, errorMessage(a.threadErr)).TextColor(c.Theme().TextMuted).Margin(0, 0, 17, 0)
@@ -58,6 +67,9 @@ func (a *reader) readerPane(c *ui.Context, p palette) {
 						post := r
 						if a.onlyAuthor && a.demo && post.post.AuthorID != a.thread.MainAuthorID {
 							continue
+						}
+						if i > 0 && post.page != a.rendered[i-1].page {
+							ui.Textf(c, "— 第%d页 —", post.page).FontSize(12).TextColor(c.Theme().TextMuted).Margin(12, 0, 22, 0)
 						}
 						if i == 1 {
 							ui.Row(c).Padding(21, 0, 17, 0).Gap(8).BorderWidth(1, 0, 0, 0).BorderColor(c.Theme().Border).Children(func() {
@@ -95,14 +107,20 @@ func (a *reader) readerPane(c *ui.Context, p palette) {
 							})
 							markdown.View(c, post.source, a.md).FillWidth()
 						})
-						rows = append(rows, readingRow{Post: post.post, Bounds: row.Bounds(), Animated: post.animated})
+						rows = append(rows, readingRow{Post: post.post, Bounds: row.Bounds(), Animated: post.animated, Page: post.page})
 					}
 					if len(a.rendered) == 0 {
 						ui.Text(c, "这一页没有可显示的回复").TextColor(c.Theme().TextMuted)
 					}
+					if !a.demo && a.threadErr == nil && len(a.rendered) > 0 {
+						a.continuationFooter(c)
+					}
 				})
 			})
 			a.observeReadingView(c, viewport.Bounds(), rows)
+			if len(rows) > 0 {
+				a.observeContinuation(viewport.Bounds(), rows[len(rows)-1].Bounds)
+			}
 			if animatedEmoteVisible(viewport.Bounds(), rows) {
 				c.After(a.emoteView.nextFrameDelay())
 			}

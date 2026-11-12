@@ -21,6 +21,7 @@ type renderedPost struct {
 	post     nga.Post
 	source   string
 	animated bool
+	page     int
 }
 type reader struct {
 	dir                                           string
@@ -69,11 +70,16 @@ type reader struct {
 	favoriteGate                                  local.RequestGate
 	directoryGate                                 local.RequestGate
 	picker                                        boardPickerState
+	manager                                       boardManagerState
 	runDirectoryTask                              func(func())
 	loadingFavorites, importAfterLogin            bool
 	listState                                     ui.ListState
 	scroll                                        ui.ScrollState
 	reading                                       readingViewState
+	continuation                                  continuationState
+	refreshingThread                              bool
+	refreshError                                  error
+	loadedOnlyAuthor                              bool
 	jump                                          pageJumpState
 	linkLastTopic                                 int64
 	runReadTask                                   func(func())
@@ -202,7 +208,7 @@ func (a *reader) resetMarkdown() {
 	a.rendered = nil
 	for _, p := range a.thread.Posts {
 		source := nga.MarkdownOnDemand(p.Content)
-		a.rendered = append(a.rendered, renderedPost{post: p, source: source, animated: containsAnimatedEmote(source)})
+		a.rendered = append(a.rendered, renderedPost{post: p, source: source, animated: containsAnimatedEmote(source), page: max(1, a.thread.Page)})
 	}
 }
 func (a *reader) shutdown() {

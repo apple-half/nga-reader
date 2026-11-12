@@ -44,10 +44,11 @@ type State struct {
 	SidebarHidden    bool        `json:"sidebarHidden,omitempty"`
 	WindowWidth      int         `json:"windowWidth,omitempty"`
 	WindowHeight     int         `json:"windowHeight,omitempty"`
+	AutoNextPage     bool        `json:"autoNextPage"`
 }
 
 func Defaults() State {
-	return State{Boards: []Board{{ID: -7, Name: "大漩涡"}}, Theme: "深色", FontSize: 15, TextOnly: true, LastBoard: -7, SidebarWidth: 180, TopicWidth: 310, WindowWidth: 1280, WindowHeight: 820, AutoCheckUpdates: true}
+	return State{Boards: []Board{{ID: -7, Name: "大漩涡"}}, Theme: "深色", FontSize: 15, TextOnly: true, LastBoard: -7, SidebarWidth: 180, TopicWidth: 310, WindowWidth: 1280, WindowHeight: 820, AutoCheckUpdates: true, AutoNextPage: true}
 }
 
 func Load(dir string) (State, error) {

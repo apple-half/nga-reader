@@ -100,7 +100,7 @@ func (a *reader) view(c *ui.Context) {
 	}
 	if !a.modalOpen() && !a.navigationBusy() && c.Shortcut(0, ui.KeyF5) {
 		if a.selected.ID > 0 {
-			a.loadThread(max(1, a.thread.Page))
+			a.loadThread(a.visibleThreadPage())
 		} else {
 			a.loadTopics(max(1, a.topics.Page))
 		}
@@ -136,6 +136,7 @@ func (a *reader) view(c *ui.Context) {
 	a.composerView(c)
 	a.updatesView(c)
 	a.pageJumpView(c)
+	a.boardManagerView(c)
 }
 
 func (a *reader) titlebar(c *ui.Context, p palette) {
@@ -172,6 +173,7 @@ func (a *reader) sidebar(c *ui.Context, p palette) {
 		navButton(c, "nav-updates", "refresh", "软件更新", updateCount, false, p, func() { a.checkUpdates(true) })
 		ui.Row(c).Padding(19, 10, 3, 10).Children(func() {
 			ui.Text(c, "我的板块").FontSize(11).TextColor(c.Theme().TextMuted).Grow(1)
+			iconButton(c, "manage-boards", "settings", "管理板块", a.navigationBusy()).OnClick(a.openBoardManager)
 			iconButton(c, "add-board", "plus", "添加板块", a.navigationBusy()).OnClick(a.openBoardPicker)
 		})
 		ui.Scroll(c).Grow(1).MinHeight(0).Gap(3).Children(func() {
@@ -192,7 +194,6 @@ func (a *reader) sidebar(c *ui.Context, p palette) {
 				row.Children(func() {
 					ui.Text(c, "#").TextColor(c.Theme().TextMuted)
 					ui.Text(c, b.Name).SingleLine().Grow(1)
-					ui.Textf(c, "%d", b.ID).FontSize(11).TextColor(c.Theme().TextMuted)
 				}).OnClick(func() { a.selectBoard(b) })
 			}
 		})
@@ -231,7 +232,12 @@ func (a *reader) topicPane(c *ui.Context, p palette) {
 			ui.Button(c, "发帖").FontSize(12).Padding(5, 9).Disabled(a.mode != "board" || a.compose.Sending).OnClick(func() { a.openComposer(nga.PostTarget{Action: "new", FID: a.board.ID}, a.board.Name) })
 			iconButton(c, "refresh", "refresh", "刷新帖子列表", a.loadingTopics || a.demo || a.mode != "board").OnClick(func() { a.loadTopics(max(1, a.topics.Page)) })
 		})
-		ui.TextInput(c.Key("filter"), &a.filter).Placeholder("筛选当前页话题…").Label("筛选话题").Margin(13, 13, 8, 13).FontSize(12)
+		ui.Row(c).Margin(13, 13, 8, 13).Gap(5).Children(func() {
+			ui.TextInput(c.Key("filter"), &a.filter).Placeholder("筛选当前页话题…").Label("筛选话题").FontSize(12).Grow(1)
+			if a.filter != "" {
+				ui.Button(c, "清除").Label("清除话题筛选").FontSize(11).Padding(4, 5).OnClick(func() { a.filter = "" })
+			}
+		})
 		ui.Row(c).Padding(0, 15, 8, 15).Gap(14).Children(func() {
 			b := ui.ButtonBase(c.Key("new")).Padding(4, 0).Label("最新讨论")
 			if !a.hot {
@@ -246,7 +252,7 @@ func (a *reader) topicPane(c *ui.Context, p palette) {
 			} else {
 				b.TextColor(c.Theme().TextMuted)
 			}
-			b.Children(func() { ui.Text(c, "热门").FontSize(12) }).OnClick(func() { a.hot = true })
+			b.Children(func() { ui.Text(c, "本页按回复数").FontSize(12) }).OnClick(func() { a.hot = true })
 			ui.Spacer(c).Grow(1)
 			iconButton(c, "open-link", "link", "打开帖子链接", false).OnClick(func() { a.linkOpen = true; a.formError = "" })
 		})
