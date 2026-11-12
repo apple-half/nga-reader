@@ -20,15 +20,15 @@
 - Embedded resource provenance, binary hashes and bounded decoding; ordinary image, posting and update protections retained.
 
 ### Task1: Catalog and safe conversion
-- [ ] RED registry completeness/hash/config/lookup/path rejection and BBCode legacy/unknown/quote/code/HTML regressions.
-- [ ] Add265official resources and source notices, data-only registry and bounded pure conversion; full Go GREEN; commit.
+- [x] RED registry completeness/hash/config/lookup/path rejection and BBCode legacy/unknown/quote/code/HTML regressions.
+- [x] Add265official resources and source notices, data-only registry and bounded pure conversion; full Go GREEN; commit.
 
 ### Task2: Native renderer and sizing
-- [ ] RED inline drawing/size/aspect/cache/baseline, GIF composition/frame bounds/timing, visibility-driven redraw and no external image loads.
-- [ ] Implement lazy shared bitmaps, native inline objects and bounded animation, native preview QA at3themes/fonts/min window; Go/vet GREEN; commit.
+- [x] RED inline drawing/size/aspect/cache/baseline, GIF composition/frame bounds/timing, visibility-driven redraw and no external image loads.
+- [x] Implement lazy shared bitmaps, native inline objects and bounded animation, native preview QA at3themes/fonts/min window; Go/vet GREEN; commit.
 
 ### Task3: Review and release
-- [ ] Version0.1.11, usage/download/source/short App and full web notes; full Go/vet/Node/Python/actionlint/privacy checks.
-- [ ] One fresh whole-branch review; fix Important/Critical once via RED→GREEN and green suite; merge/post-merge verify/push new tag.
-- [ ] Native CI3ZIPs/draft, wrapper+ZIP digest checks, offline sign and verify compact notes, upload/finalize, re-download all public files and validate live feeds plus isolated Windows SDK update.
-- [ ] Retain local portable ZIPs/previews, archive QA and remove only owned scratch/server, sync final public validation docs.
+- [x] Version0.1.11, usage/download/source/short App and full web notes; full Go/vet/Node/Python/actionlint/privacy checks.
+- [x] One fresh whole-branch review; fix Important/Critical once via RED→GREEN and green suite; merge/post-merge verify/push new tag.
+- [x] Native CI3ZIPs/draft, wrapper+ZIP digest checks, offline sign and verify compact notes, upload/finalize, re-download all public files and validate live feeds plus isolated Windows SDK update.
+- [x] Retain local portable ZIPs/previews, archive QA and remove only owned scratch/server, sync final public validation docs.
