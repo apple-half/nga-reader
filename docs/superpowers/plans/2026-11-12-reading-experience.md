@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 落地前轮体验建议与自动续页，完成原生交互验证和便携发布。
+**Goal:** 落地前轮体验建议与自动续页，完成本地原生交互验证和 Windows 免安装预览包。用户最新指示：不提交 GitHub，等待后续需求。
 **Architecture:** 在 reader 中增加有界连续段、阅读导航、正文查找及板块管理状态；复用 RequestGate、阅读锚点、Markdown 和临时图片窗口。
 **Tech Stack:** Go 1.27.3, MyGo 0.8.3，无新依赖。
 **Spec:** docs/superpowers/specs/2026-11-12-reading-experience-design.md
@@ -70,8 +70,8 @@
 - [ ] Tests: all loaded posts extract safe images, dedup/index clicked image, next/previous bounds, no prefetch, reset zoom, unsupported targets rejected.
 - [ ] Focused RED; implement gallery actions/counters/zoom, manual and shortcut hints; full suite PASS; commit.
 
-### Task 8: Review, portable release and evidence
-**Files:** versions/release/download docs and docs/validation-0.1.12.md.
+### Task 8: Review, local portable preview and evidence
+**Files:** local version metadata and docs/validation-0.1.12.md; public download links and release feed remain at published 0.1.11.
 - [ ] Native previews 980/1280/wide across themes and continuation states; full Go/vet, Node, Python packaging, version/privacy/diff checks; Expected: PASS.
 - [ ] Whole-branch fresh reviewer; one Critical/Important fix pass with RED→GREEN; ledger all decisions and deferred minors.
-- [ ] Publish new immutable 0.1.12 via existing CI, verify Windows/macOS archives, signed manifests and public feed, download local packages, archive private QA and update root AGENTS; Expected: exact assets/signatures/notes and clean synced main.
+- [ ] Build/verify local 0.1.12 Windows portable preview; optional local Mac cross-compilation. Keep all remote branches/tags/assets/feeds untouched. Update local validation and AGENTS with unfinished release work; Expected: local package verified, no GitHub writes.
