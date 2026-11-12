@@ -11,3 +11,5 @@ Apply immediately to native header, empty reader, current window, tray and macOS
 Scope: implement and validate locally; do not replace the already published0.1.13 assets or publish a new release in this task. Keep D-drive software/data untouched. Native Windows/macOS behavior needs actual platform verification; cross compilation is not GUI proof.
 
 Follow-up authorization2026-11-12: user requested updating GitHub. Fast-forward the verified source to main and push; keep published0.1.13 assets, tags and update indexes unchanged. A new binary release remains separate.
+
+Follow-up release authorization2026-11-12: user explicitly requested a new Windows and Mac portable release. Published0.1.14 through existing native-build/offline-sign/verify workflow; see docs/validation-0.1.14.md.
