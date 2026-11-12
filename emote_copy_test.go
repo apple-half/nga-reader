@@ -72,3 +72,28 @@ func TestNativeEmoteTableCopyKeepsCodesAndCellSeparators(t *testing.T) {
 		t.Fatalf("table clipboard lost contents: %q", got)
 	}
 }
+
+func TestEnhancedEmoteCopyUsesCommittedMappingForShortcutAndMenu(t *testing.T) {
+	for _, action := range []string{"shortcut", "menu"} {
+		t.Run(action, func(t *testing.T) {
+			a := newReader(t.TempDir())
+			defer a.cancel()
+			source := nga.MarkdownOnDemand("甲[s:ac:哭笑]😀[s:5][s:ac:哭笑]\n\n[quote]中文引用[s:5][/quote]") + "\n\n| 列 | 表情 |\n|---|---|\n| 乙 | " + nga.MarkdownOnDemand("[s:ac:哭笑]") + " |"
+			tt := ui.NewTester(func(c *ui.Context) { a.theme(c); a.bodyMarkdown(c, source) }, 650, 500)
+			tt.ClickAt(10, 10)
+			tt.Command("selectAll")
+			if action == "shortcut" {
+				tt.Key(ui.Cmd|ui.Shift, ui.KeyC)
+			} else {
+				tt.RightClickAt(10, 10)
+				if err := tt.ChooseMenuItem("复制为NGA代码"); err != nil {
+					t.Fatal(err)
+				}
+			}
+			want := "甲[s:ac:哭笑]😀[s:0:5][s:ac:哭笑]\n\n中文引用[s:0:5]\n\n列\t表情\n乙\t[s:ac:哭笑]"
+			if got := tt.Clipboard(); got != want {
+				t.Fatalf("%s copied wrong native selection: %q", action, got)
+			}
+		})
+	}
+}

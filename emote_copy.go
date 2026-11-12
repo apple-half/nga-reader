@@ -68,7 +68,6 @@ func (a *reader) bodyMarkdown(c *ui.Context, source string) ui.Element {
 	if !state.HasEmote {
 		return root.Children(func() { markdown.View(c, source, a.md).FillWidth() })
 	}
-	clear(state.Paragraphs)
 	root.Selectable().CopyData(state.copy).ContextMenu(func(m *ui.Menu) {
 		m.EditItems()
 		if m.Item("复制为NGA代码").Chosen() {
@@ -78,6 +77,9 @@ func (a *reader) bodyMarkdown(c *ui.Context, source string) ui.Element {
 	if root.FocusWithin() && root.Shortcut(ui.Cmd|ui.Shift, ui.KeyC) {
 		c.Services().WriteClipboardData(state.copy(root.SelectedTexts()))
 	}
+	// Context-menu choices and frame shortcuts read the committed selection.
+	// Keep that frame's source mapping until those requests have been served.
+	clear(state.Paragraphs)
 	options := &markdown.Options{Theme: a.md.Theme, OnLink: a.openLink, WrapCode: true, ShareSelection: true}
 	options.Block = func(c *ui.Context, d *parser.Document, i int) bool {
 		if a.emoteTable(c, d, i, state) {
